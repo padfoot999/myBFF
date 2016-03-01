@@ -44,7 +44,27 @@ class Framework():
         self.config["port"] = args.port
         self.config["UserFile"] = args.UserFile
     def banner(self, argv):
-        print "i <3 myBFF"
+        print """
+            @         @          @
+            @        @  @       @  @
+            @       @    @    @      @
+            @      @       @ @         @
+            @      @                   @
+            @       @                 @
+                     @               @
+                      @             @
+                       @           @
+                        @        @
+                          @    @
+                            @ @
+                             @
+                                      @@@@  @@@@  @@@@
+                                      @   @ @     @
+                    @@ @@   @  @      @@@@  @@@   @@@
+                    @ @ @   @  @      @   @ @     @
+                    @   @     @@      @@@@  @     @
+                               @
+                             @@@"""
         print " ---a Brute Force Framework by l0gan (@kirkphayes)"
     def run(self, argv):
         self.parseParameters(argv)
