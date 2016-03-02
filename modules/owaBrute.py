@@ -10,7 +10,7 @@ class OWAlogin():
     def connectTest(self, config, payload):
         with session() as c:
             cpost = c.post(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/owa/auth.owa', data=payload, allow_redirects=True, verify=False)
-            m = re.search('&reason=2', cpost.headers)
+            m = re.search('The user name or password you entered', cpost.text)
             if m:
                 print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
             else:
