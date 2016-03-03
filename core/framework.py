@@ -1,7 +1,16 @@
 #! /bin/python
-#test 2
 import argparse
 from fingerprint import Fingerprint
+import sys
+
+class Logger(object):
+    def __init__(self):
+        self.terminal = sys.stdout
+        self.log = open("output.txt", "a")
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+
 
 class Framework():
     def __init__(self):
@@ -40,6 +49,10 @@ class Framework():
             dest="threads",
             action="store",
             help="Number of threads to use for brute forcing. (not yet implemented.)")
+        filesgroup.add_argument("-o",
+            dest="output",
+            action="store",
+            help="Outfile File Name")
         args = parser.parse_args()
         self.config["USERNAME"] = args.USERNAME
         self.config["PASSWORD"] = args.PASSWORD
@@ -48,8 +61,7 @@ class Framework():
         self.config["port"] = args.port
         self.config["UserFile"] = args.UserFile
         self.config["threads"] = args.threads
-        if self.config["threads"]:
-            print("This function has not been implemented yet. Threads will be set to 1...Sorry...")
+        self.config["output"] = args.output
     def banner(self, argv):
         print """
 
@@ -105,6 +117,10 @@ class Framework():
                    ..`                                                                                                                                                   """
         print " ---a Brute Force Framework by l0gan (@kirkphayes)"
     def run(self, argv):
-        self.banner(self)
         self.parseParameters(argv)
+        if self.config["output"]:
+            sys.stdout = Logger() #logging works as output.txt, but want to make so it will log to specific file.
+        self.banner(self)
+        if self.config["threads"]:
+            print("This function has not been implemented yet. Threads will be set to 1...Sorry...")
         self.runner(self)
