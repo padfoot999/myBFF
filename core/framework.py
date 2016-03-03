@@ -87,34 +87,34 @@ class Framework():
                                       -s
                                       ./
                                       `
-                                   -.`--:--:..`         -.//:.:-////://:.`/o/ `.-/:--::///:://-.`o+-
-                                  .hNdNNdyhmNmds.       .sMMMmMmyhhosshdm+NMh `-dMMNNMdyhyosyhdyyMM/
-                                   /MMNN:  .hMMMs        oMMMMMo       `:-NM-   dMMMMN-       `:oMd`
-                                   .MMMN-   +MMm-        /MMMMd`         `hM`   yMMMMo          .Mh
-                                   `MNNM+ .:mMs+`        -NMMMd       ``  sm`   sMMMMo       .   No
-                                   `NMMNsymMMh--``       `yMMMd      .yo  :o    .NMMM+     `:d.  s-
-                                   `dMMMMMMMMNMMddho:    -NMMMy    `sNM-  .:    oMMMM:    .dNh`  :.
-                                   .NMMmMd++//omMMMMM-   `NMMMNo+-+hMMm         /MMMMd+/:omMMo
-                                   `MMNmM:     -NMMMM/   /MMMMMNdmNNMMd         yMMMMMmdmNMMM+
-                                   `mmNds       sMMMM.   -MMMMm.``.:sNm         sMMMMs``..:dMo
-                                   `hNNm:       +MMMN`   `mMMMy`     -y`        :MMMM/     `+s
-                                   -MNmM:       :MMMy    -NMMMh.       `        oMMMMo
-                                   .NmMM+       yMMd`    `hMMMm`                -NMMMs
-      yms`.:+o` `-//`               hNMMs       hMN/     .mMMMd                 +MMMM+
-      sMNssoNMhyyodmh``dm/   -+yh`  oNMNd      .dM:      `hMMMm`                :NMMMs
-      /md`  +MMo  `:N: mN.    omo  `NMMMh    `sNms       :dMMMm                 oNMMMo
-       dd   `mM.   -N+ sd     oMo   hMMMN/-/yddo/        :MMMMm.                sMMMMh
-      .N+    /N:   sMs ym-``-oNMo  .mMMMNdmds.           /MMMMM+`               yMMMMm:
-      /ms:  `oh:   /hh-:ydyyo/+No ::/yhoso:`             ohdhydhs/             `hddyhdyo.
-                          `   :No                                `                     `
-                              `mo
-                              `mo
-                              `mo
-                     :-      `sN:
-                    ++      -yNo
-                   oy   `-+hh+.
-                  -mdoooo+-`
-                   ..`                                                                                                                                                   """
+                               -.`--:--:..`         -.//:.:-////://:.`/o/ `.-/:--::///:://-.`o+-
+                              .hNdNNdyhmNmds.       .sMMMmMmyhhosshdm+NMh `-dMMNNMdyhyosyhdyyMM/
+                               /MMNN:  .hMMMs        oMMMMMo       `:-NM-   dMMMMN-       `:oMd`
+                               .MMMN-   +MMm-        /MMMMd`         `hM`   yMMMMo          .Mh
+                               `MNNM+ .:mMs+`        -NMMMd       ``  sm`   sMMMMo       .   No
+                               `NMMNsymMMh--``       `yMMMd      .yo  :o    .NMMM+     `:d.  s-
+                               `dMMMMMMMMNMMddho:    -NMMMy    `sNM-  .:    oMMMM:    .dNh`  :.
+                               .NMMmMd++//omMMMMM-   `NMMMNo+-+hMMm         /MMMMd+/:omMMo
+                               `MMNmM:     -NMMMM/   /MMMMMNdmNNMMd         yMMMMMmdmNMMM+
+                               `mmNds       sMMMM.   -MMMMm.``.:sNm         sMMMMs``..:dMo
+                               `hNNm:       +MMMN`   `mMMMy`     -y`        :MMMM/     `+s
+                               -MNmM:       :MMMy    -NMMMh.       `        oMMMMo
+                               .NmMM+       yMMd`    `hMMMm`                -NMMMs
+  yms`.:+o` `-//`               hNMMs       hMN/     .mMMMd                 +MMMM+
+  sMNssoNMhyyodmh``dm/   -+yh`  oNMNd      .dM:      `hMMMm`                :NMMMs
+  /md`  +MMo  `:N: mN.    omo  `NMMMh    `sNms       :dMMMm                 oNMMMo
+   dd   `mM.   -N+ sd     oMo   hMMMN/-/yddo/        :MMMMm.                sMMMMh
+  .N+    /N:   sMs ym-``-oNMo  .mMMMNdmds.           /MMMMM+`               yMMMMm:
+  /ms:  `oh:   /hh-:ydyyo/+No ::/yhoso:`             ohdhydhs/             `hddyhdyo.
+                      `   :No                                `                     `
+                          `mo
+                          `mo
+                          `mo
+                 :-      `sN:
+                ++      -yNo
+               oy   `-+hh+.
+              -mdoooo+-`
+               ..`                                                                                                                                                   """
         print " ---a Brute Force Framework by l0gan (@kirkphayes)"
     def run(self, argv):
         self.parseParameters(argv)
