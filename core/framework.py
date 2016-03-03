@@ -36,6 +36,10 @@ class Framework():
             dest="UserFile",
             action="store",
             help="File containing Usernames")
+        filesgroup.add_argument("-t",
+            dest="threads",
+            action="store",
+            help="Number of threads to use for brute forcing. (not yet implemented.)")
         args = parser.parse_args()
         self.config["USERNAME"] = args.USERNAME
         self.config["PASSWORD"] = args.PASSWORD
@@ -43,6 +47,9 @@ class Framework():
         self.config["protocol"] = args.protocol
         self.config["port"] = args.port
         self.config["UserFile"] = args.UserFile
+        self.config["threads"] = args.threads
+        if self.config["threads"]:
+            print("This function has not been implemented yet. Threads will be set to 1...Sorry...")
     def banner(self, argv):
         print """
 
@@ -98,6 +105,6 @@ class Framework():
                    ..`                                                                                                                                                   """
         print " ---a Brute Force Framework by l0gan (@kirkphayes)"
     def run(self, argv):
-        self.parseParameters(argv)
         self.banner(self)
+        self.parseParameters(argv)
         self.runner(self)
