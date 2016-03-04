@@ -2,15 +2,7 @@
 import argparse
 from fingerprint import Fingerprint
 import sys
-
-class Logger(object):
-    def __init__(self):
-        self.terminal = sys.stdout
-        self.log = open("output.txt", "a")
-    def write(self, message):
-        self.terminal.write(message)
-        self.log.write(message)
-
+from Logger import Logger
 
 class Framework():
     def __init__(self):
@@ -52,7 +44,7 @@ class Framework():
         filesgroup.add_argument("-o",
             dest="output",
             action="store",
-            help="Outfile File Name")
+            help="File to output results to.")
         args = parser.parse_args()
         self.config["USERNAME"] = args.USERNAME
         self.config["PASSWORD"] = args.PASSWORD
@@ -114,12 +106,13 @@ class Framework():
                 ++      -yNo
                oy   `-+hh+.
               -mdoooo+-`
-               ..`                                                                                                                                                   """
+               .. """
         print " ---a Brute Force Framework by l0gan (@kirkphayes)"
     def run(self, argv):
         self.parseParameters(argv)
         if self.config["output"]:
-            sys.stdout = Logger() #logging works as output.txt, but want to make so it will log to specific file.
+            writer = Logger(sys.stdout, self.config["output"])
+            sys.stdout = writer
         self.banner(self)
         if self.config["threads"]:
             print("This function has not been implemented yet. Threads will be set to 1...Sorry...")
