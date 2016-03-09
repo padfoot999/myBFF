@@ -9,22 +9,28 @@ from modules.JuniperBrute import JuniperBrute
 from modules.SiteScopeBrute import SiteScopeBrute
 #from modules.Office365Brute import office365Brute
 from modules.owaBrute import OWAlogin
+from modules.citrixBrute2010 import citrixbrute2010
 
 class Fingerprint():
     def connect(self, config):
         if config["protocol"] == "http" or config["protocol"] == "https":
             with session() as c:
                 initialConnect = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"], verify=False)
-                cit = re.search('Citrix', initialConnect.text)
+                cit = re.search('Citrix Access Gateway', initialConnect.text)
                 mi = re.search('MobileIron', initialConnect.text)
                 jun = re.search('dana-na', initialConnect.text)
                 hpss = re.search('SiteScope', initialConnect.text)
                 o365 = re.search('Office 365', initialConnect.text)
                 owa = re.search('Outlook Web App', initialConnect.text)
+                cit2 = re.search("2010 Citrix", initialConnect.text)
                 if cit:
                     print "[+]  Citrix Access Gateway found. Running Citrix Brute Force Module..."
                     citrixBrute = citrixbrute()
                     citrixBrute.payload(config)
+                if cit2:
+                    print "[+]  Citrix Access Gateway 2010 found. Running Citrix Brute Force Module..."
+                    citrixBrute2010 = citrixbrute2010()
+                    citrixBrute2010.payload(config)
                 elif mi:
                     print "[+]  MobileIron found. Running MobileIron Brute Force Module..."
                     mobileiron = MobileIron()
