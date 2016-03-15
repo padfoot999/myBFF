@@ -59,7 +59,7 @@ class Framework():
         self.config["output"] = args.output
 
         if ((self.config["UserFile"] == "") and (self.config["USERNAME"] == "") and (self.config["PASSWORD"] == "")):
-            print "Either -u amd -p both must be set or -U must be set"
+            print "Either -u and -p both must be set or -U must be set"
             parser.print_help()
             sys.exit(1)
 
