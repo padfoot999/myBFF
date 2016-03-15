@@ -15,7 +15,7 @@ class Fingerprint():
     def connect(self, config):
         if config["protocol"] == "http" or config["protocol"] == "https":
             with session() as c:
-                initialConnect = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"], verify=False)
+                initialConnect = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"], verify=True)
                 cit = re.search('Citrix Access Gateway', initialConnect.text)
                 mi = re.search('MobileIron', initialConnect.text)
                 jun = re.search('dana-na', initialConnect.text)
@@ -27,7 +27,7 @@ class Fingerprint():
                     print "[+]  Citrix Access Gateway found. Running Citrix Brute Force Module..."
                     citrixBrute = citrixbrute()
                     citrixBrute.payload(config)
-                if cit2:
+                elif cit2:
                     print "[+]  Citrix Access Gateway 2010 found. Running Citrix Brute Force Module..."
                     citrixBrute2010 = citrixbrute2010()
                     citrixBrute2010.payload(config)

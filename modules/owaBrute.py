@@ -9,7 +9,7 @@ from argparse import ArgumentParser
 class OWAlogin():
     def connectTest(self, config, payload):
         with session() as c:
-            cpost = c.post(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/owa/auth.owa', data=payload, allow_redirects=True, verify=False)
+            cpost = c.post(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/owa/auth.owa', data=payload, allow_redirects=True, verify=True)
             m = re.search('The user name or password you entered', cpost.text)
             if m:
                 print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
