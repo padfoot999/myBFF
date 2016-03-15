@@ -4,9 +4,6 @@
 
 import base64
 import httplib
-import os
-import re
-from lxml import etree
 
 class office365Brute():
     def buildConn(self, request, user, password, host, url):
