@@ -16,6 +16,7 @@ class Framework():
         filesgroup.add_argument("--host",
             dest="HOST",
             action="store",
+            required=True,
             help="Host to test against")
         filesgroup.add_argument("-u",
             dest="USERNAME",
@@ -28,10 +29,12 @@ class Framework():
         filesgroup.add_argument("--protocol",
             dest="protocol",
             action="store",
+            required=True,
             help="Protocol to use (i.e., http or https)")
         filesgroup.add_argument("--port",
             dest="port",
             action="store",
+            required=True,
             help="Port to use. Default for protocol https is port 443, and http is port 80")
         filesgroup.add_argument("-U",
             dest="UserFile",
@@ -54,6 +57,12 @@ class Framework():
         self.config["UserFile"] = args.UserFile
         self.config["threads"] = args.threads
         self.config["output"] = args.output
+
+        if ((self.config["UserFile"] == "") and (self.config["USERNAME"] == "") and (self.config["PASSWORD"] == "")):
+            print "Either -u and -p both must be set or -U must be set"
+            parser.print_help()
+            sys.exit(1)
+
     def banner(self, argv):
         print """
 
