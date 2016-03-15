@@ -46,19 +46,20 @@
                 ++      -yNo
                oy   `-+hh+.
               -mdoooo+-`
-               ..`                                                                               
+               ..`
 --- A Brute Force Framework by Kirk Hayes (l0gan)
 
 myBFF is a web application brute force framework (currently)
 
-Point the framework at a file containing usernames, a host, and give it a password. The framework will determine what type of web application is in use, then attempt to brute force accounts.
+Point the framework at a file containing usernames, a host, and give it a password. The framework will determine what type of web application is in use, then attempt to brute force accounts. After brute forcing accounts, myBFF will then do a little more, like enumerating apps available, and reading in important data. Each module is different so try them out!
 
 Currently the modules are:
 
-- HP SiteScope
+- HP SiteScope (will attempt to give you a Meterpreter Shell!)
 - Citrix Gateway (also enumerates authorized applications)
-- Juniper Portal
-- MobileIron
+- Juniper Portal (Will look for 2FA bypass and list what is accessible)
+- MobileIron (Unknown. Have to find out what is accessible first!)
+- Outlook/Office365 (will parse email, contacts, and other data from email)
 
 New modules will be added.
 
