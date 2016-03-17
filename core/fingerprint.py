@@ -52,43 +52,6 @@ class Fingerprint():
                     owalogin = OWAlogin()
                     owalogin.payload(config)
                 else:
-                    print "[-]  Not sure what the system is. If it is one of the below, select it. Otherwise, choose 99 and create your own module!"
-                    Selection = {}
-                    Selection['1']="Citrix Access Gateway"
-                    Selection['2']="MobileIron"
-                    Selection['3']="Juniper Portal"
-                    Selection['4']="HP SiteScope"
-                    Selection['5']="Office365"
-                    Selection['6']="Outlook Web Access"
-                    Selection['99']="I don't know, I'll create a module."
-                    while True:
-                        options=Selection.keys()
-                        options.sort()
-                        for entry in options:
-                            print entry, Selection[entry]
-                        selection = raw_input("Which module would you like to load?  ")
-                        if selection == "1":
-                            citrixBrute = citrixbrute()
-                            citrixBrute.payload(config)
-                        elif selection == "2":
-                            mobileiron = MobileIron()
-                            mobileiron.payload(config)
-                        elif selection =="3":
-                            juniper = JuniperBrute()
-                            juniper.payload(config)
-                        elif selection == "4":
-                            sitescope = SiteScopeBrute()
-                            sitescope.payload(config)
-                        elif selection == "5":
-                            office365 = office365Brute()
-                            office365.payload(config)
-                        elif selection == "6":
-                            owalogin = OWAlogin()
-                            owalogin.payload(config)
-                        elif selection == "99":
-                            print("Try to create a module. It's easy!")
-                            break
-                        else:
-                            print "Invalid Selection"
+                    print "[-]  Fingerprinting Failed."
         else:
             print("Other protocols have not yet been implemented, but I'm working on it! :-)")
