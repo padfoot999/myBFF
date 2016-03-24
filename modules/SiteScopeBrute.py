@@ -11,6 +11,7 @@ import socket
 class SiteScopeBrute():
     def connectTest(self, config, payload):
         with session() as c:
+            requests.packages.urllib3.disable_warnings()
             resp1 = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/SiteScope/')
             cookie1 = resp1.cookies['JSESSIONID']
             cookies = dict(JSESSIONID=cookie1)

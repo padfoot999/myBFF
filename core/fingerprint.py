@@ -1,4 +1,4 @@
-#! /bin/python
+#! /usr/bin/python
 # Fingerprint Web Applications to determine which brute force module should be run.
 from requests import session
 import requests
@@ -13,16 +13,20 @@ from modules.citrixBrute2010 import citrixbrute2010
 
 class Fingerprint():
     def connect(self, config):
-        if config["protocol"] == "http" or config["protocol"] == "https":
+        if "http" in config["protocol"]:
             with session() as c:
-                initialConnect = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"], verify=True)
+                requests.packages.urllib3.disable_warnings()
+                if str(config["vhost"]) == 'None':
+                    initialConnect = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"], verify=False)
+                else:
+                    initialConnect = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + "/" + config["vhost"], verify=False)
                 cit = re.search('Citrix Access Gateway', initialConnect.text)
                 mi = re.search('MobileIron', initialConnect.text)
                 jun = re.search('dana-na', initialConnect.text)
                 hpss = re.search('SiteScope', initialConnect.text)
                 o365 = re.search('Office 365', initialConnect.text)
                 owa = re.search('Outlook Web App', initialConnect.text)
-                cit2 = re.search("2010 Citrix", initialConnect.text)
+                cit2 = re.search("Citrix/XenApp", initialConnect.text)
                 if cit:
                     print "[+]  Citrix Access Gateway found. Running Citrix Brute Force Module..."
                     citrixBrute = citrixbrute()
@@ -52,6 +56,7 @@ class Fingerprint():
                     owalogin = OWAlogin()
                     owalogin.payload(config)
                 else:
+                    print initialConnect.text
                     print "[-]  Fingerprinting Failed."
         else:
             print("Other protocols have not yet been implemented, but I'm working on it! :-)")
