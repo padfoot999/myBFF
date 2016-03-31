@@ -13,25 +13,23 @@ from modules.citrixBrute2010 import citrixbrute2010
 
 class Fingerprint():
     def connect(self, config):
-        if "http" in config["protocol"]:
+        if 'http' in config["HOST"]:
             with session() as c:
                 requests.packages.urllib3.disable_warnings()
-                if str(config["vhost"]) == 'None':
-                    initialConnect = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"], verify=False)
-                else:
-                    initialConnect = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + "/" + config["vhost"], verify=False)
+                initialConnect = c.get(config["HOST"], verify=False)
                 cit = re.search('Citrix Access Gateway', initialConnect.text)
                 mi = re.search('MobileIron', initialConnect.text)
                 jun = re.search('dana-na', initialConnect.text)
                 hpss = re.search('SiteScope', initialConnect.text)
                 o365 = re.search('Office 365', initialConnect.text)
                 owa = re.search('Outlook Web App', initialConnect.text)
-                cit2 = re.search("Citrix/XenApp", initialConnect.text)
+                cit2 = re.search("2010 Citrix", initialConnect.text)
+                cit3 = re.search("2008 Citrix", initialConnect.text)
                 if cit:
                     print "[+]  Citrix Access Gateway found. Running Citrix Brute Force Module..."
                     citrixBrute = citrixbrute()
                     citrixBrute.payload(config)
-                elif cit2:
+                elif cit2 or cit3:
                     print "[+]  Citrix Access Gateway 2010 found. Running Citrix Brute Force Module..."
                     citrixBrute2010 = citrixbrute2010()
                     citrixBrute2010.payload(config)

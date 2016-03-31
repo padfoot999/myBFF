@@ -26,16 +26,16 @@ class Framework():
             dest="PASSWORD",
             action="store",
             help="Password")
-        filesgroup.add_argument("--protocol",
-            dest="protocol",
-            action="store",
-            required=True,
-            help="Protocol to use (i.e., http or https)")
-        filesgroup.add_argument("--port",
-            dest="port",
-            action="store",
-            required=True,
-            help="Port to use. Default for protocol https is port 443, and http is port 80")
+#        filesgroup.add_argument("--protocol",
+#            dest="protocol",
+#            action="store",
+#            required=True,
+#            help="Protocol to use (i.e., http or https)")
+#        filesgroup.add_argument("--port",
+#            dest="port",
+#            action="store",
+#            required=True,
+#            help="Port to use. Default for protocol https is port 443, and http is port 80")
         filesgroup.add_argument("-U",
             dest="UserFile",
             action="store",
@@ -48,20 +48,20 @@ class Framework():
             dest="output",
             action="store",
             help="File to output results to.")
-        filesgroup.add_argument("--vhost",
-            dest="vhost",
-            action="store",
-            help="Virtual Directory (i.e., for rapid7.com/owa enter owa). This is used for fingerprinting purposes only.")
+#        filesgroup.add_argument("--vhost",
+#            dest="vhost",
+#            action="store",
+#            help="Virtual Directory (i.e., for rapid7.com/owa enter owa). This is used for fingerprinting purposes only.")
         args = parser.parse_args()
         self.config["USERNAME"] = args.USERNAME
         self.config["PASSWORD"] = args.PASSWORD
         self.config["HOST"] = args.HOST
-        self.config["protocol"] = args.protocol
-        self.config["port"] = args.port
+#        self.config["protocol"] = args.protocol
+#        self.config["port"] = args.port
         self.config["UserFile"] = args.UserFile
         self.config["threads"] = args.threads
         self.config["output"] = args.output
-        self.config["vhost"] = args.vhost
+#        self.config["vhost"] = args.vhost
         if ((self.config["UserFile"] == "") and (self.config["USERNAME"] == "") and (self.config["PASSWORD"] == "")):
             print "Either -u and -p both must be set or -U must be set"
             parser.print_help()

@@ -63,6 +63,8 @@ Currently the modules are:
 
 New modules will be added.
 
+myBFF requires lxml. Install using 'sudo apt-get install python-lxml'
+
 Planned Development:
 - If multifactor authentication found on any module, attempt any known bypasses (ex. Juniper url_default to url_1-100 to see if any do not require multi factor)
 - moar modules!

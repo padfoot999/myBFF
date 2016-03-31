@@ -56,6 +56,10 @@ class office365Brute():
     def buildConn(self, request, user, password, host, url, context):
         # Build authentication string, remove newline for using it in a http header
         auth = base64.encodestring("%s:%s" % (user, password)).replace('\n', '')
+        if 'https' in host:
+            host = host.strip('https://')
+        else:
+            host = host.strip('http://')
         conn = httplib.HTTPSConnection(host, context=context)
         conn.request("POST", url, body=request, headers={
             "Host": host,
@@ -71,7 +75,7 @@ class office365Brute():
         return (status, data)
 
     def connectTest(self, config, payload):
-        url = config["protocol"] + "://" + config["HOST"] + ':' + config["port"] + "/ews/Exchange.asmx"
+        url = config["HOST"] + "/ews/Exchange.asmx"
         request = """<?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
                xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types">

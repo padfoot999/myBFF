@@ -10,7 +10,7 @@ class OWAlogin():
     def connectTest(self, config, payload):
         with session() as c:
             requests.packages.urllib3.disable_warnings()
-            cpost = c.post(config["protocol"] + '://' + config["HOST"] + ':' + config["port"] + '/owa/auth.owa', data=payload, allow_redirects=True, verify=False)
+            cpost = c.post(config["HOST"] + '/owa/auth.owa', data=payload, allow_redirects=True, verify=False)
             m = re.search("The user name or password you entered isn't correct", cpost.text)
             if m:
                 print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])
