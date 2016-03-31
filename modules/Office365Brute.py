@@ -60,6 +60,9 @@ class office365Brute():
             host = host.strip('https://')
         else:
             host = host.strip('http://')
+        if '/' in host:
+            host = re.sub(r'/\w+', '', host)
+            print host
         conn = httplib.HTTPSConnection(host, context=context)
         conn.request("POST", url, body=request, headers={
             "Host": host,

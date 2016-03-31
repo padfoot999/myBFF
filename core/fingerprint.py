@@ -21,8 +21,8 @@ class Fingerprint():
                 mi = re.search('MobileIron', initialConnect.text)
                 jun = re.search('dana-na', initialConnect.text)
                 hpss = re.search('SiteScope', initialConnect.text)
-                o365 = re.search('Office 365', initialConnect.text)
-                owa = re.search('Outlook Web App', initialConnect.text)
+                o365 = re.search('outlook', initialConnect.text)
+                owa = re.search('Outlook', initialConnect.text)
                 cit2 = re.search("2010 Citrix", initialConnect.text)
                 cit3 = re.search("2008 Citrix", initialConnect.text)
                 if cit:
@@ -51,8 +51,8 @@ class Fingerprint():
                     office365.payload(config)
                 elif owa:
                     print "[+]  Outlook Web App found. Running OWA Brute Force Module..."
-                    owalogin = OWAlogin()
-                    owalogin.payload(config)
+                    office365 = office365Brute()
+                    office365.payload(config)
                 else:
                     print initialConnect.text
                     print "[-]  Fingerprinting Failed."
