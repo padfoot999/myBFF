@@ -10,22 +10,39 @@ from modules.SiteScopeBrute import SiteScopeBrute
 from modules.Office365Brute import office365Brute
 from modules.owaBrute import OWAlogin
 from modules.citrixBrute2010 import citrixbrute2010
+from modules.citAPI import citapiBrute
+#from modules.SMBbrute import SMB
 
 class Fingerprint():
     def connect(self, config):
         if 'http' in config["HOST"]:
             with session() as c:
                 requests.packages.urllib3.disable_warnings()
-                initialConnect = c.get(config["HOST"], verify=False)
+                if config["vhost"]:
+                    initialConnect = c.get(config["HOST"] + "/" + config["vhost"], verify=False)
+                else:
+                    initialConnect = c.get(config["HOST"], verify=False)
+                #print initialConnect.text
+                citAPI = re.search('Citrix', initialConnect.text)
+                if citAPI:
+                    try:
+                        citConnect = c.get(config["HOST"] + '/nitro/v1/config', allow_redirects=False, verify=False)
+                        if str(citConnect.status_code) == '200':
+                            print "[+]  Citrix API found. Running Citrix API Brute Force Module..."
+                            citapibrute = citapiBrute()
+                            citapibrute.payload(config)
+                    except:
+                        print "oops"
                 cit = re.search('Citrix Access Gateway', initialConnect.text)
                 mi = re.search('MobileIron', initialConnect.text)
                 jun = re.search('dana-na', initialConnect.text)
                 hpss = re.search('SiteScope', initialConnect.text)
                 o365 = re.search('outlook', initialConnect.text)
                 owa = re.search('Outlook', initialConnect.text)
-                cit2 = re.search("2010 Citrix", initialConnect.text)
-                cit3 = re.search("2008 Citrix", initialConnect.text)
-                if cit:
+                cit2 = re.search("Citrix/XenApp", initialConnect.text)
+                cit3 = re.search("20[1,0][4,8,0,9] Citrix", initialConnect.text)
+                cit4 = re.search("2005 Citrix", initialConnect.text)
+                if cit or cit4:
                     print "[+]  Citrix Access Gateway found. Running Citrix Brute Force Module..."
                     citrixBrute = citrixbrute()
                     citrixBrute.payload(config)
@@ -51,10 +68,18 @@ class Fingerprint():
                     office365.payload(config)
                 elif owa:
                     print "[+]  Outlook Web App found. Running OWA Brute Force Module..."
+                    #owalogin = OWAlogin()
+                    #owalogin.payload(config)
                     office365 = office365Brute()
                     office365.payload(config)
                 else:
-                    print initialConnect.text
+                    #print initialConnect.text
                     print "[-]  Fingerprinting Failed."
+                    #citapibrute = citapiBrute()
+                    #citapibrute.payload(config)
+        #elif 'smb' in config["HOST"]:
+#            print "[+]  You selected SMB brute forcing. Running SMB Brute Force Module..."
+#            smbbrute = SMB()
+#            smbbrute.payload(config)
         else:
             print("Other protocols have not yet been implemented, but I'm working on it! :-)")

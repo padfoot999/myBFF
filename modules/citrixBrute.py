@@ -35,6 +35,7 @@ class citrixbrute():
         with session() as c:
             requests.packages.urllib3.disable_warnings()
             cpost = c.post(config["HOST"] + '/cgi/login', data=payload, allow_redirects=True, verify=False)
+            print cpost.text
             if "set-cookie': 'N" in str(cpost.headers):
                 print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
                 try:

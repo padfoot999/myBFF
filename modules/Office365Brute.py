@@ -50,6 +50,7 @@ class office365Brute():
                 pass
         print("[+]  Contacts found. Saving to tmp/contacts-" + config["USERNAME"] + "...")
         for contact in sorted(set(contacts)):
+            print("[+]  Contact Name:  " + contact)
             f = open('tmp/contacts-' + config["USERNAME"] + '.txt', 'a')
             f.write(contact + '\n')
             f.close()
@@ -61,8 +62,7 @@ class office365Brute():
         else:
             host = host.strip('http://')
         if '/' in host:
-            host = re.sub(r'/\w+', '', host)
-            print host
+            host = re.sub(r'/s\w+', '', host)
         conn = httplib.HTTPSConnection(host, context=context)
         conn.request("POST", url, body=request, headers={
             "Host": host,
