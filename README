@@ -65,6 +65,15 @@ New modules will be added.
 
 myBFF requires lxml. Install using 'sudo apt-get install python-lxml'
 
+USE:
+python myBFF.py --host https://example.com -U userfile.txt -p password123
+--host - Host including protocol. Protocols currently support http and https only.
+-u - test single username
+-U - username file
+-p - password
+--vhost (optional) - virtual hosting. This is for when you have a site where https://example.com goes to one page, but https://example.com/owa goes to another
+-o - output file
+
 Planned Development:
 - If multifactor authentication found on any module, attempt any known bypasses (ex. Juniper url_default to url_1-100 to see if any do not require multi factor)
 - moar modules!
