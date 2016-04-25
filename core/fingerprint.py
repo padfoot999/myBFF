@@ -10,7 +10,7 @@ from modules.SiteScopeBrute import SiteScopeBrute
 from modules.Office365Brute import office365Brute
 from modules.owaBrute import OWAlogin
 from modules.citrixBrute2010 import citrixbrute2010
-#from modules.citAPI import citapiBrute
+from modules.citAPI import citapiBrute
 #from modules.SMBbrute import SMB
 
 class Fingerprint():
@@ -27,12 +27,13 @@ class Fingerprint():
                 if citAPI:
                     try:
                         citConnect = c.get(config["HOST"] + '/nitro/v1/config', allow_redirects=False, verify=False)
-                        if str(citConnect.status_code) == '200':
+                        if str(citConnect.status_code) == '200' or str(citConnect.status_code) == '401':
                             print "[+]  Citrix API found. Running Citrix API Brute Force Module..."
                             citapibrute = citapiBrute()
                             citapibrute.payload(config)
                     except:
                         print "oops"
+                    raise SystemExit
                 cit = re.search('Citrix Access Gateway', initialConnect.text)
                 mi = re.search('MobileIron', initialConnect.text)
                 jun = re.search('dana-na', initialConnect.text)
