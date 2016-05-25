@@ -21,8 +21,7 @@ class Fingerprint():
                 if config["vhost"]:
                     initialConnect = c.get(config["HOST"] + "/" + config["vhost"], verify=False)
                 else:
-                    initialConnect = c.get(config["HOST"], verify=False)
-                #print initialConnect.text
+                    initialConnect = c.get(config["HOST"], verify=False, allow_redirects=True)
                 citAPI = re.search('Citrix', initialConnect.text)
                 if citAPI:
                     try:
@@ -33,7 +32,7 @@ class Fingerprint():
                             citapibrute.payload(config)
                     except:
                         print "oops"
-                    raise SystemExit
+                    #raise SystemExit
                 cit = re.search('Citrix Access Gateway', initialConnect.text)
                 mi = re.search('MobileIron', initialConnect.text)
                 jun = re.search('dana-na', initialConnect.text)
@@ -48,7 +47,7 @@ class Fingerprint():
                     citrixBrute = citrixbrute()
                     citrixBrute.payload(config)
                 elif cit2 or cit3:
-                    print "[+]  Citrix Access Gateway 2010 found. Running Citrix Brute Force Module..."
+                    print "[+]  Citrix Access Gateway found. Running Citrix Brute Force Module..."
                     citrixBrute2010 = citrixbrute2010()
                     citrixBrute2010.payload(config)
                 elif mi:
@@ -63,24 +62,11 @@ class Fingerprint():
                     print "[+]  HP SiteScope found. Running SiteScope Brute Force Module..."
                     sitescope = SiteScopeBrute()
                     sitescope.payload(config)
-                elif o365:
-                    print "[+]  Office365 found. Running Office365 Brute Force Module..."
-                    office365 = office365Brute()
-                    office365.payload(config)
-                elif owa:
-                    print "[+]  Outlook Web App found. Running OWA Brute Force Module..."
-                    #owalogin = OWAlogin()
-                    #owalogin.payload(config)
+                elif o365 or owa:
+                    print "[+]  Office365/OWA found. Running Office365/OWA Brute Force Module..."
                     office365 = office365Brute()
                     office365.payload(config)
                 else:
-                    #print initialConnect.text
                     print "[-]  Fingerprinting Failed."
-                    #citapibrute = citapiBrute()
-                    #citapibrute.payload(config)
-        #elif 'smb' in config["HOST"]:
-#            print "[+]  You selected SMB brute forcing. Running SMB Brute Force Module..."
-#            smbbrute = SMB()
-#            smbbrute.payload(config)
         else:
             print("Other protocols have not yet been implemented, but I'm working on it! :-)")
