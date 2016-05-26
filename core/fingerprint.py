@@ -11,7 +11,6 @@ from modules.Office365Brute import office365Brute
 from modules.owaBrute import OWAlogin
 from modules.citrixBrute2010 import citrixbrute2010
 from modules.citAPI import citapiBrute
-#from modules.SMBbrute import SMB
 
 class Fingerprint():
     def connect(self, config):
