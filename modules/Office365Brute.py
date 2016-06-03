@@ -24,6 +24,7 @@ class office365Brute():
 
         contacts = []
         # Print Mail properties
+        print("[+]  Searching for sensitive emails...")
         elements = root.xpath(xpathStr, namespaces=namespaces)
         for element in elements:
             try:
@@ -49,12 +50,13 @@ class office365Brute():
             except:
                 pass
         print("[+]  Any contacts found will be saved to tmp/contacts-" + config["USERNAME"] + "...")
-        for contact in sorted(set(contacts)):
-            print("[+]  Contact Name:  " + contact)
-            f = open('./tmp/contacts-' + config["USERNAME"] + '.txt', 'a')
-            f.write(contact + '\n')
-            f.close()
-        else:
+        try:
+            for contact in sorted(set(contacts)):
+                #print("[+]  Contact Name:  " + contact)
+                f = open('./tmp/contacts-' + config["USERNAME"] + '.txt', 'a')
+                f.write(contact + '\n')
+                f.close()
+        except:
             print("[-]  No contacts found in mailbox.")
     def buildConn(self, request, user, password, host, url, context):
         # Build authentication string, remove newline for using it in a http header
