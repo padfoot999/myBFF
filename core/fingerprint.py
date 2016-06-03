@@ -8,7 +8,6 @@ from modules.MobileIronBrute import MobileIron
 from modules.JuniperBrute import JuniperBrute
 from modules.SiteScopeBrute import SiteScopeBrute
 from modules.Office365Brute import office365Brute
-from modules.owaBrute import OWAlogin
 from modules.citrixBrute2010 import citrixbrute2010
 from modules.citAPI import citapiBrute
 
