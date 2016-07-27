@@ -26,7 +26,7 @@ class SiteScopeBrute():
                 host = config["HOST"].split(":")[1]
                 host = host.split("/")[2]
                 port = config["HOST"].split(":")[2]
-		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                 s.connect((host,int(port)))
                 locIP = s.getsockname()[0]
                 s.close()
