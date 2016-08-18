@@ -80,5 +80,6 @@ python myBFF.py --host https://example.com -U userfile.txt -p password123
 -o - output file
 ```
 
-Planned Development:
-See: 
+## Planned Development:
+
+See: https://github.com/MooseDojo/myBFF/wiki/Future-Plans
