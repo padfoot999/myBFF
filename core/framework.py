@@ -21,8 +21,8 @@ class Framework():
         self.colors = Colors()
         self.modulelock = RLock()
         self.coolness = {}
-    def runner(self, argv):
-        modules_dict, finger_dict = self.loadModules()    #eachmodule["Function"]=modules.module1.fingerprint
+    def runner(self):
+        modules_dict, finger_dict = self.loadModules()
         self.connectTest(modules_dict, finger_dict)
 
     def search(self, values, searchFor):
@@ -35,7 +35,10 @@ class Framework():
     def connectTest(self, modules_dict, finger_dict):
             with session() as c:
                 requests.packages.urllib3.disable_warnings()
-                initialConnect = c.get(self.config["HOST"], verify=False, allow_redirects=True)
+                if self.config["vhost"]:
+                    initialConnect = c.get(self.config["HOST"] + "/" + self.config["vhost"], verify=False)
+                else:
+                    initialConnect = c.get(self.config["HOST"], verify=False, allow_redirects=True)
                 for k in finger_dict:
                     search = re.search(str(k), initialConnect.text)
                     if search:
@@ -246,8 +249,9 @@ class Framework():
             print("This function has not been implemented yet. Threads will be set to 1...Sorry...")
         if self.config["PASS_FILE"]:
             acceptance = raw_input("""
-[!]  WARNING! BRUTE FORCE MODE ENABLED! THIS LIKELY WILL LOCK OUT ACCOUNTS! ARE YOU SURE YOU WANT TO RUN? (type YES to continue)
+[!]  WARNING! BRUTE FORCE MODE ENABLED! THIS LIKELY WILL LOCK OUT ACCOUNTS! ARE YOU SURE YOU WANT TO RUN? (type Y to continue)
 """)
-            if acceptance != 'YES':
+            if acceptance != 'Y':
+                print("[-] Exiting")
                 sys.exit()
-        self.runner(self)
+        self.runner()
