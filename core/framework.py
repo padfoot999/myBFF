@@ -1,15 +1,128 @@
 #! /usr/bin/python
 import argparse
-from fingerprint import Fingerprint
 import sys
 from Logger import Logger
+import ConfigParser
+import os
+import sys
+import re
+import imp
+from core.utils import Display, Colors
+import requests
+from requests import session
+import re
+from threading import RLock, Thread
+import importlib
 
 class Framework():
     def __init__(self):
         self.config = {}
-    def runner(self, argv):
-        fingerprint = Fingerprint()
-        fingerprint.connect(self.config)
+        self.display = Display()
+        self.colors = Colors()
+        self.modulelock = RLock()
+        self.coolness = {}
+    def runner(self):
+        modules_dict, finger_dict = self.loadModules()
+        self.connectTest(modules_dict, finger_dict)
+
+    def search(self, values, searchFor):
+        for k in values:
+            for v in values[k]:
+                if searchFor in k:
+                    return v
+                    return None
+
+    def connectTest(self, modules_dict, finger_dict):
+            with session() as c:
+                requests.packages.urllib3.disable_warnings()
+                if self.config["vhost"]:
+                    initialConnect = c.get(self.config["HOST"] + "/" + self.config["vhost"], verify=False)
+                else:
+                    initialConnect = c.get(self.config["HOST"], verify=False, allow_redirects=True)
+                for k in finger_dict:
+                    search = re.search(str(k), initialConnect.text)
+                    if search:
+                        print "[+] Running " + self.search(finger_dict, str(k)) + " module..."
+                        mod_run = self.search(finger_dict, str(k))
+                        mod_import = "modules." + mod_run
+                        for test in self.coolness.keys():
+                            if mod_run in test:
+                                _instance = self.coolness[test]
+                                _instance.payload(self.config)
+
+    def loadFingerprint(self, type, dirpath, filename):
+        finger_dict = {}
+        mod_name = filename.split('.')[0]
+        mod_dispname = '/'.join(re.split('/modules/' + type, dirpath)[-1].split('/') + [mod_name])
+        mod_loadname = mod_dispname.replace('/', '_')
+        mod_loadpath = os.path.join(dirpath, filename)
+        mod_file = open(mod_loadpath)
+        try:
+            # import the module into memory
+            imp.load_source(mod_loadname, mod_loadpath, mod_file)
+            # find the module and make an instace of it
+            _module = __import__(mod_loadname)
+            _class = getattr(_module, mod_name)
+            _instance = _class(self.config, self.display, self.modulelock)
+            finger_dict = {mod_name: 'name',
+                            'fingerprint': _instance.getFingerprint()}
+
+
+        except Exception as e:
+            # notify the user of errors
+            print e
+            self.display.error('Module \'%s\' disabled.' % (mod_name))
+            return None
+        return finger_dict
+
+    def loadModule(self, type, dirpath, filename):
+        module_dict = {}
+        mod_name = filename.split('.')[0]
+        mod_dispname = '/'.join(re.split('/modules/' + type, dirpath)[-1].split('/') + [mod_name])
+        mod_loadname = mod_dispname.replace('/', '_')
+        mod_loadpath = os.path.join(dirpath, filename)
+        mod_file = open(mod_loadpath)
+        try:
+            # import the module into memory
+            imp.load_source(mod_loadname, mod_loadpath, mod_file)
+            # find the module and make an instace of it
+            _module = __import__(mod_loadname)
+            _class = getattr(_module, mod_name)
+            _instance = _class(self.config, self.display, self.modulelock)
+            valid = True
+            module_dict = {'name': mod_name,
+                               'fingerprint': _instance.getFingerprint(),
+                               'response': _instance.getResponse(),
+                               'valid': True,
+                               'somethingCool': _instance.doSomethingCool()}
+            self.coolness[mod_dispname] = _instance
+
+        except Exception as e:
+            # notify the user of errors
+            print e
+            self.display.error('Module \'%s\' disabled.' % (mod_name))
+            return None
+        return module_dict
+
+    def loadModules(self):
+        module_dict = {}
+        finger_dict = {}
+        path = os.path.join(sys.path[0], 'modules/')
+        for dirpath, dirnames, filenames in os.walk(path):
+            # remove hidden files and directories
+            filenames = [f for f in filenames if not f[0] == '.']
+            dirnames[:] = [d for d in dirnames if not d[0] == '.']
+            if len(filenames) > 0:
+                for filename in [f for f in filenames if (f.endswith('.py') and not f == "__init__.py")]:
+                    module = self.loadModule("modules", dirpath, filename)
+                    if module is not None:
+                        module_dict[module['name'].rstrip(" ")] = module
+                    fingerprint = self.loadFingerprint("modules", dirpath, filename)
+                    if module is not None:
+                        finger_dict[fingerprint['fingerprint'].rstrip(" ")] = fingerprint
+
+        return module_dict, finger_dict
+
     def parseParameters(self, argv):
         parser = argparse.ArgumentParser()
         filesgroup = parser.add_argument_group('inputs')
@@ -43,6 +156,14 @@ class Framework():
             dest="output",
             action="store",
             help="File to output results to.")
+        filesgroup.add_argument("-P",
+            dest="PASS_FILE",
+            action="store",
+            help="File containing Passwords")
+        filesgroup.add_argument("-d",
+            dest="dry_run",
+            action="store_true",
+            help="Dry run mode. Disables the 'SomethingCool' mode")
         filesgroup.add_argument("--vhost",
             dest="vhost",
             action="store",
@@ -55,7 +176,10 @@ class Framework():
         self.config["UserFile"] = args.UserFile
         self.config["threads"] = args.threads
         self.config["output"] = args.output
+        self.config["PASS_FILE"] = args.PASS_FILE
+        self.config["dry_run"] = args.dry_run
         self.config["vhost"] = args.vhost
+        parser.set_defaults(dry_run=False)
         if ((self.config["UserFile"] == "") and (self.config["USERNAME"] == "") and (self.config["PASSWORD"] == "")):
             print "Either -u and -p both must be set or -U must be set"
             parser.print_help()
@@ -123,4 +247,11 @@ class Framework():
         self.banner(self)
         if self.config["threads"]:
             print("This function has not been implemented yet. Threads will be set to 1...Sorry...")
-        self.runner(self)
+        if self.config["PASS_FILE"]:
+            acceptance = raw_input("""
+[!]  WARNING! BRUTE FORCE MODE ENABLED! THIS LIKELY WILL LOCK OUT ACCOUNTS! ARE YOU SURE YOU WANT TO RUN? (type Y to continue)
+""")
+            if acceptance != 'Y':
+                print("[-] Exiting")
+                sys.exit()
+        self.runner()

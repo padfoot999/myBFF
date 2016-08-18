@@ -1,4 +1,5 @@
-
+# myBFF - a Brute Force Framework
+```
                          `.-:-.`           `.-::-.`
                      `:oyhhyooooo+:`    -+osooooyhhs+.
                    `/yhhs:`      `.-.`-/:.      `./syyo.
@@ -48,12 +49,12 @@
               -mdoooo+-`
                ..`
 --- A Brute Force Framework by Kirk Hayes (l0gan)
-
+```
 myBFF is a web application brute force framework (currently)
 
 Point the framework at a file containing usernames, a host, and give it a password. The framework will determine what type of web application is in use, then attempt to brute force accounts. After brute forcing accounts, myBFF will then do a little more, like enumerating apps available, and reading in important data. Each module is different so try them out!
 
-Currently the modules are:
+## Current modules:
 
 - HP SiteScope (will attempt to give you a Meterpreter Shell!)
 - Citrix Gateway (also enumerates authorized applications)
@@ -63,18 +64,21 @@ Currently the modules are:
 
 New modules will be added.
 
+## CONFIGURATION
 myBFF requires lxml. Install using 'sudo apt-get install python-lxml'
 
-USE:
+## USE:
+```
 python myBFF.py --host https://example.com -U userfile.txt -p password123
 --host - Host including protocol. Protocols currently support http and https only.
 -u - test single username
 -U - username file
 -p - password
+-P - password file
+-d - dry run mode (skip somethingCool/password guessing only)
 --vhost (optional) - virtual hosting. This is for when you have a site where https://example.com goes to one page, but https://example.com/owa goes to another
 -o - output file
+```
 
 Planned Development:
-- If multifactor authentication found on any module, attempt any known bypasses (ex. Juniper url_default to url_1-100 to see if any do not require multi factor)
-- moar modules!
-- Open to other protocols?
+See: 

