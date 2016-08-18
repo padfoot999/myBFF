@@ -68,6 +68,7 @@ New modules will be added.
 myBFF requires lxml. Install using 'sudo apt-get install python-lxml'
 
 ## USE:
+https://github.com/MooseDojo/myBFF/wiki/Use
 ```
 python myBFF.py --host https://example.com -U userfile.txt -p password123
 --host - Host including protocol. Protocols currently support http and https only.
