@@ -38,21 +38,20 @@ class Office365Brute(webModule):
                     '{http://schemas.microsoft.com/exchange/services/2006/types}From/{'
                     'http://schemas.microsoft.com/exchange/services/2006/types}Mailbox/{'
                     'http://schemas.microsoft.com/exchange/services/2006/types}Name').text
- # If running agains a Small Business Server, this will break...
-                fromemail = element.find(
-                    '{http://schemas.microsoft.com/exchange/services/2006/types}From/{'
-                    'http://schemas.microsoft.com/exchange/services/2006/types}Mailbox/{'
-                    'http://schemas.microsoft.com/exchange/services/2006/types}EmailAddress').text
+#                fromemail = element.find(
+#                    '{http://schemas.microsoft.com/exchange/services/2006/types}From/{'
+#                    'http://schemas.microsoft.com/exchange/services/2006/types}Mailbox/{'
+#                    'http://schemas.microsoft.com/exchange/services/2006/types}EmailAddress').text
                 itemid = element.find('{http://schemas.microsoft.com/exchange/services/2006/types}ItemId').attrib['Id']
                 changekey = element.find('{http://schemas.microsoft.com/exchange/services/2006/types}ItemId').attrib[
                     'ChangeKey']
-                contacts.append(fromname.encode('ascii', 'ignore') + " (" + fromemail.encode('ascii', 'ignore') + ")")
+                contacts.append(fromname.encode('ascii', 'ignore')) #+ " (" + fromemail.encode('ascii', 'ignore') + ")")
                 for search_term in term:
                     if re.search(search_term, subject, re.IGNORECASE):
                         print "[+] This could be interesting: "
                         print "[+]       * Subject : " + subject.encode('ascii', 'ignore')
-                        print "[+]       * From : " + fromname.encode('ascii', 'ignore' + " (" + fromemail.encode('ascii',
-                                                                                                         'ignore') + ")"
+                        print "[+]       * From : " + fromname.encode('ascii', 'ignore') #+ " (" + fromemail.encode('ascii',
+                                                                                                         #'ignore') + ")"
             except:
                 pass
         print("[+]  Any contacts found will be saved to tmp/contacts-" + config["USERNAME"] + "...")
