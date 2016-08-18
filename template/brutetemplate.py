@@ -1,15 +1,19 @@
 #! /usr/bin/python
-# This template will help get you started with a module
+from core.webModule import webModule
 from requests import session
 import requests
 import re
 from argparse import ArgumentParser
 
 class ClassName():
+    def __init__(self, config, display, lock):
+        super(SiteScopeBrute, self).__init__(config, display, lock)
+        self.fingerprint="" # What is used to fingerprint this web app?
+        self.response="" # What constitutes a valid response?
     def somethingCool(self, config, payload):
         #Do something cool here
     def connectTest(self, config, payload):
-        #Create a session and check if account is valid
+        #Create a session and check if account is valid  THIS IS AN EXAMPLE ONLY
         with session() as c:
             resp1 = c.get(config["HOST"] + '/employee/login.jsp', verify=False)
             cookie1 = resp1.cookies['JSESSIONID']
@@ -20,12 +24,39 @@ class ClassName():
             m = re.search('You are unauthorized to access this page.', cpost.text)
             if m:
                 print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
-                self.somethingCool(config, payload)
+                if not config["dry_run"]:
+                    print("[!] Time to do something cool!")
+                    self.somethingCool(config, payload)
             else:
                 print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])
+    def scraper(self, config):
+        # Scrape page to find which parameters are needed
+        with session() as c:
+            resp1 = c.get(config["HOST"] + '/login', verify=False)
+            print resp1.text
     def payload(self, config):
-        # Create authentication payload
-        if config["UserFile"]:
+        # Set payload parameters (i.e. replace j_username and j_password with the correct parameters)
+        if config["PASS_FILE"]:
+            pass_lines = [pass_line.rstrip('\n') for pass_line in open(config["PASS_FILE"])]
+            for pass_line in pass_lines:
+                if config["UserFile"]:
+                    lines = [line.rstrip('\n') for line in open(config["UserFile"])]
+                    for line in lines:
+                        config["USERNAME"] = line.strip('\n')
+                        config["PASSWORD"] = pass_line.strip('\n')
+                        payload = {
+                            'j_username': config["USERNAME"],
+                            'j_password': config["PASSWORD"]
+                            }
+                        self.connectTest(config, payload)
+                else:
+                    config["PASSWORD"] = pass_line.strip('\n')
+                    payload = {
+                        'j_username': config["USERNAME"],
+                        'j_password': config["PASSWORD"]
+                        }
+                    self.connectTest(config, payload)
+        elif config["UserFile"]:
             lines = [line.rstrip('\n') for line in open(config["UserFile"])]
             for line in lines:
                 config["USERNAME"] = line.strip('\n')

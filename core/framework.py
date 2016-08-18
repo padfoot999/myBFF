@@ -39,9 +39,9 @@ class Framework():
                 for k in finger_dict:
                     search = re.search(str(k), initialConnect.text)
                     if search:
-                        print "[+] Found in " + self.search(finger_dict, str(k))
+                        print "[+] Running " + self.search(finger_dict, str(k)) + " module..."
                         mod_run = self.search(finger_dict, str(k))
-                        mod_import = "modules." + mod_run# + "." + mod_run
+                        mod_import = "modules." + mod_run
                         for test in self.coolness.keys():
                             if mod_run in test:
                                 _instance = self.coolness[test]
@@ -153,6 +153,14 @@ class Framework():
             dest="output",
             action="store",
             help="File to output results to.")
+        filesgroup.add_argument("-P",
+            dest="PASS_FILE",
+            action="store",
+            help="File containing Passwords")
+        filesgroup.add_argument("-d",
+            dest="dry_run",
+            action="store_true",
+            help="Dry run mode. Disables the 'SomethingCool' mode")
         filesgroup.add_argument("--vhost",
             dest="vhost",
             action="store",
@@ -165,7 +173,10 @@ class Framework():
         self.config["UserFile"] = args.UserFile
         self.config["threads"] = args.threads
         self.config["output"] = args.output
+        self.config["PASS_FILE"] = args.PASS_FILE
+        self.config["dry_run"] = args.dry_run
         self.config["vhost"] = args.vhost
+        parser.set_defaults(dry_run=False)
         if ((self.config["UserFile"] == "") and (self.config["USERNAME"] == "") and (self.config["PASSWORD"] == "")):
             print "Either -u and -p both must be set or -U must be set"
             parser.print_help()
@@ -233,4 +244,10 @@ class Framework():
         self.banner(self)
         if self.config["threads"]:
             print("This function has not been implemented yet. Threads will be set to 1...Sorry...")
+        if self.config["PASS_FILE"]:
+            acceptance = raw_input("""
+[!]  WARNING! BRUTE FORCE MODE ENABLED! THIS LIKELY WILL LOCK OUT ACCOUNTS! ARE YOU SURE YOU WANT TO RUN? (type YES to continue)
+""")
+            if acceptance != 'YES':
+                sys.exit()
         self.runner(self)

