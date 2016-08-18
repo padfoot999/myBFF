@@ -1,12 +1,17 @@
 #! /usr/bin/python
 # Created by Kirk Hayes (l0gan) @kirkphayes
 # Part of myBFF
+from core.webModule import webModule
 from requests import session
 import requests
 import re
 from argparse import ArgumentParser
 
-class JuniperBrute():
+class JuniperBrute(webModule):
+    def __init__(self, config, display, lock):
+        super(JuniperBrute, self).__init__(config, display, lock)
+        self.fingerprint="dana-na"
+        self.response="Success"
     ignore = ['tz_offset','btnSubmit']
     URLS = []
     nomfaurls = []

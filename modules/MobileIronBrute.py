@@ -1,12 +1,17 @@
 #! /usr/bin/python
 # Created by Kirk Hayes (l0gan) @kirkphayes
 # Part of myBFF
+from core.webModule import webModule
 from requests import session
 import requests
 import re
 from argparse import ArgumentParser
 
-class MobileIron():
+class MobileIronBrute(webModule):
+    def __init__(self, config, display, lock):
+        super(MobileIronBrute, self).__init__(config, display, lock)
+        self.fingerprint="MobileIron"
+        self.response="Success"
     def connectTest(self, config, payload):
         with session() as c:
             requests.packages.urllib3.disable_warnings()

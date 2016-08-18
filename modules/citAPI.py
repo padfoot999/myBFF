@@ -1,10 +1,15 @@
 #! /usr/bin/python
 #import the necessary libraries
+from core.webModule import webModule
 import base64
 import requests
 from requests import session
 
-class citapiBrute():
+class citAPI(webModule):
+    def __init__(self, config, display, lock):
+        super(citAPI, self).__init__(config, display, lock)
+        self.fingerprint="citAPI"
+        self.response="Success"
     def appDetect(self, config, payload):
         print("Doing something cool...eventually...")
     def connectTest(self, config, payload):

