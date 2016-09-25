@@ -61,6 +61,8 @@ Point the framework at a file containing usernames, a host, and give it a passwo
 - Juniper Portal (Will look for 2FA bypass and list what is accessible)
 - MobileIron (Unknown. Have to find out what is accessible first!)
 - Outlook/Office365 (will parse email, contacts, and other data from email)
+- Wordpress (Will be adding "SomethingCool" soon)
+- CiscoVPN (Enumerate User accounts (May not work on all configurations))
 
 New modules will be added.
 
@@ -79,6 +81,7 @@ python myBFF.py --host https://example.com -U userfile.txt -p password123
 -d - dry run mode (skip somethingCool/password guessing only)
 --vhost (optional) - virtual hosting. This is for when you have a site where https://example.com goes to one page, but https://example.com/owa goes to another
 -o - output file
+--timeout <value> - timeout (Used to pause during password file attacks.)
 ```
 
 ## Planned Development:
