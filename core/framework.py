@@ -71,7 +71,6 @@ class Framework():
         except Exception as e:
             # notify the user of errors
             print e
-            self.display.error('Module \'%s\' disabled.' % (mod_name))
             return None
         return finger_dict
 
@@ -100,7 +99,6 @@ class Framework():
         except Exception as e:
             # notify the user of errors
             print e
-            self.display.error('Module \'%s\' disabled.' % (mod_name))
             return None
         return module_dict
 
@@ -148,10 +146,6 @@ class Framework():
             dest="UserFile",
             action="store",
             help="File containing Usernames")
-        filesgroup.add_argument("-t",
-            dest="threads",
-            action="store",
-            help="Number of threads to use for brute forcing. (not yet implemented.)")
         filesgroup.add_argument("-o",
             dest="output",
             action="store",
@@ -168,17 +162,31 @@ class Framework():
             dest="vhost",
             action="store",
             help="Virtual Directory (i.e., for rapid7.com/owa enter owa). This is used for fingerprinting purposes only.")
+#        filesgroup.add_argument("--proxies",
+#            dest="proxies",
+#            action="store",
+#            help="Comma-separated list of SOCKS proxies. (i.e. 127.0.0.1:9050,127.0.0.1:18085)")
+        filesgroup.add_argument("--timeout",
+            dest="timeout",
+            action="store",
+            help="Number of minutes to wait between password sprays (Brute Force Mode Only)")
         args = parser.parse_args()
         self.config["USERNAME"] = args.USERNAME
         self.config["PASSWORD"] = args.PASSWORD
         self.config["HOST"] = args.HOST
         self.config["domain"] = args.domain
         self.config["UserFile"] = args.UserFile
-        self.config["threads"] = args.threads
         self.config["output"] = args.output
         self.config["PASS_FILE"] = args.PASS_FILE
         self.config["dry_run"] = args.dry_run
         self.config["vhost"] = args.vhost
+        #self.config["proxies"] = str(args.proxies).split(',')
+        self.config["timeout"] = args.timeout
+        print self.config["timeout"]
+        if self.config["timeout"] is None:
+            self.config["timeout"] = 0
+        else:
+            self.config["timeout"] = float(self.config["timeout"])*60
         parser.set_defaults(dry_run=False)
         if ((self.config["UserFile"] == "") and (self.config["USERNAME"] == "") and (self.config["PASSWORD"] == "")):
             print "Either -u and -p both must be set or -U must be set"
@@ -245,8 +253,7 @@ class Framework():
             writer = Logger(sys.stdout, self.config["output"])
             sys.stdout = writer
         self.banner(self)
-        if self.config["threads"]:
-            print("This function has not been implemented yet. Threads will be set to 1...Sorry...")
+        #print "Timeout Value = " + str(self.config["timeout"])
         if self.config["PASS_FILE"]:
             acceptance = raw_input("""
 [!]  WARNING! BRUTE FORCE MODE ENABLED! THIS LIKELY WILL LOCK OUT ACCOUNTS! ARE YOU SURE YOU WANT TO RUN? (type Y to continue)

