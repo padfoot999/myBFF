@@ -74,13 +74,13 @@ https://github.com/MooseDojo/myBFF/wiki/Use
 ```
 python myBFF.py --host https://example.com -U userfile.txt -p password123
 --host - Host including protocol. Protocols currently support http and https only.
--u - test single username
--U - username file
--p - password
--P - password file
+-u <username> - test single username
+-U <usernameFile> - username file
+-p <password> - password
+-P <passwordFile> - password file
 -d - dry run mode (skip somethingCool/password guessing only)
---vhost (optional) - virtual hosting. This is for when you have a site where https://example.com goes to one page, but https://example.com/owa goes to another
--o - output file
+--vhost <virtualDirectory> (optional) - virtual hosting. This is for when you have a site where https://example.com goes to one page, but https://example.com/owa goes to another
+-o <outputFile> - output file
 --timeout <value> - timeout (Used to pause during password file attacks.)
 ```
 
