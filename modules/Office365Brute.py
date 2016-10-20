@@ -9,6 +9,8 @@ import random
 import time
 import requests
 from requests import session
+import sys
+
 
 
 class Office365Brute(webModule):
@@ -35,8 +37,7 @@ class Office365Brute(webModule):
         for element in elements:
             try:
                 subject = element.find('{http://schemas.microsoft.com/exchange/services/2006/types}Subject').text
-                fromname = element.find(
-                    '{http://schemas.microsoft.com/exchange/services/2006/types}From/{'
+                fromname = element.find('{http://schemas.microsoft.com/exchange/services/2006/types}From/{'
                     'http://schemas.microsoft.com/exchange/services/2006/types}Mailbox/{'
                     'http://schemas.microsoft.com/exchange/services/2006/types}Name').text
 #               fromemail = element.find(
@@ -84,7 +85,8 @@ class Office365Brute(webModule):
                 print("[+]  User Credentials Successful: " + user + ":" + config["PASSWORD"])
                 if not config["dry_run"]:
                     print("[!] Time to do something cool!")
-                    data = str(resp1.text)
+                    resp2 = resp1.text.encode('raw_unicode_escape').decode('ascii')
+                    data = str(resp2)
                     self.somethingCool(self.term, data, config)
             else:
                 print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])
