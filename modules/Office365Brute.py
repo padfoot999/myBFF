@@ -12,7 +12,7 @@ import requests
 class Office365Brute(webModule):
     def __init__(self, config, display, lock):
         super(Office365Brute, self).__init__(config, display, lock)
-        self.fingerprint="Outlook"
+        self.fingerprint="[O,o]utlook"
         self.response="Success"
     term = ['credential', 'account', 'password', 'login', 'confidential']
     def somethingCool(self, term, data, config):
