@@ -42,8 +42,9 @@ class JuniperBrute(webModule):
             self.nomfaurls.append(URL)
             return False
     def connectTest(self, config, payload, URL):
+        payoad = self.payload(config)
         with session() as c:
-            proxy = random.choice(config["proxies"])
+            requests.packages.urllib3.disable_warnings()
             if 'url_default' in self.nomfaurls:
                 URL = 'url_default'
             else:
@@ -97,7 +98,7 @@ class JuniperBrute(webModule):
                                     'realm': realm,
                                     'btnSubmit': 'Sign+In'
                                     }
-                                    self.connectTest(config, payload)
+                                    return payload
                                     time.sleep(config["timeout"])
                             else:
                                 config["PASSWORD"] = pass_line.strip('\n')
