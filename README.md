@@ -64,7 +64,7 @@ Point the framework at a file containing usernames, a host, and give it a passwo
 - Outlook/Office365 (will parse email, contacts, and other data from email)
 - Wordpress (Will be adding "SomethingCool" soon)
 - CiscoVPN (Enumerate User accounts (May not work on all configurations))
-- Okta (Will be adding "Something Cool" soon)
+- Okta (Enumerate Applications and check if 2FA is setup for account)
 - Jenkins (Will be adding "Something Cool" soon)
 
 New modules will be added.
