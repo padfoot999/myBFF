@@ -14,6 +14,7 @@ class citrix2016Brute(webModule):
         super(citrix2016Brute, self).__init__(config, display, lock)
         self.fingerprint="2016 Citrix"
         self.response="default.aspx"
+        self.protocol="web"
     ignore = ['Settings','Log Off', 'Messages']
     def somethingCool(self, config, c, cookies2, cpost, proxy):
        resp3 = c.get(config["HOST"] + '/Citrix/XenApp/site/default.aspx?CTX_MessageType=INFORMATION&CTX_MessageKey=WorkspaceControlReconnectPartialTemp', cookies=cookies2, allow_redirects=False, verify=False, proxies=proxy)

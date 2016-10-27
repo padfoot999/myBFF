@@ -15,6 +15,7 @@ class wordpressBrute(webModule):
         super(wordpressBrute, self).__init__(config, display, lock)
         self.fingerprint="wp-content"
         self.response="Success"
+        self.protocol="web"
     def somethingCool(self, config, c):
         print("We will do something cool....eventually!")
     def GOTMLSbypass(self, config, payload):

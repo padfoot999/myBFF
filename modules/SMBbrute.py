@@ -13,6 +13,7 @@ class SMBbrute(nonHTTPModule):
         super(SMBbrute, self).__init__(config, display, lock)
         self.fingerprint="SMB"
         self.response=""
+        self.protocol="smb"
 
     def somethingCool(self, config, userID, password, server_name, conn, connection):
             try:
@@ -22,10 +23,13 @@ class SMBbrute(nonHTTPModule):
                 print "[-]        User is not an Administrator"
 
     def connectTest(self, config, userID, password, server_name, proxy):
-        conn = SMBConnection(userID, password, 'pycon', server_name, use_ntlm_v2=True, domain=config["domain"], sign_options=SMBConnection.SIGN_WHEN_SUPPORTED, is_direct_tcp=True)
-        connection = conn.connect(server_name, 445)
-        if connection:
-            print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
-            self.somethingCool(config, userID, password, server_name, conn, connection)
+        if not config["domain"]:
+            print("[-]  ERROR: You must supply a domain/workgroup with --domain")
         else:
-            print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])
+            conn = SMBConnection(userID, password, 'pycon', server_name, use_ntlm_v2=True, domain=config["domain"], sign_options=SMBConnection.SIGN_WHEN_SUPPORTED, is_direct_tcp=True)
+            connection = conn.connect(server_name, 445)
+            if connection:
+                print("[+]  User Credentials Successful: " + config["USERNAME"] + ":" + config["PASSWORD"])
+                self.somethingCool(config, userID, password, server_name, conn, connection)
+            else:
+                print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])

@@ -14,6 +14,7 @@ class jenkinsBrute(webModule):
         super(jenkinsBrute, self).__init__(config, display, lock)
         self.fingerprint="Jenkins"
         self.response="Success"
+        self.protocol="web"
     def somethingCool(self, config, payload, proxy):
         #Do something cool here
         print("Something Cool not yet implemented")

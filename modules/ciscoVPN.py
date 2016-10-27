@@ -11,6 +11,7 @@ class ciscoVPN(webModule):
         super(ciscoVPN, self).__init__(config, display, lock)
         self.fingerprint="CSCOE"
         self.response=""
+        self.protocol="web"
     def somethingCool(self, config, payload, check):
         if 'a0=24' in check:
             host = config["HOST"]

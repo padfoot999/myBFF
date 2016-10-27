@@ -13,6 +13,7 @@ class citrixBrute(webModule):
         super(citrixBrute, self).__init__(config, display, lock)
         self.fingerprint="2012 Citrix"
         self.response="Success"
+        self.protocol="web"
     ignore = ['Settings','Log Off']
     def somethingCool(self, config, c, cookie1, cookies, proxy):
        c.headers.update({'Host': config["HOST"], 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Referer': config["protocol"] + '://' + config["HOST"] + '/Citrix/XenAppCAGProd23/auth/silentDetection.aspx', 'Accept-Language': 'en-US,en;q=0.5'})

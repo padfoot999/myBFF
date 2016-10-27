@@ -14,6 +14,7 @@ class oktaBrute(webModule):
         super(oktaBrute, self).__init__(config, display, lock)
         self.fingerprint="okta" # What is used to fingerprint this web app?
         self.response="302" # What constitutes a valid response?
+        self.protocol="web"
     def somethingCool(self, config, payload, c, cookies):
         #check if 2FA is setup
         cget = c.get(config["HOST"] + '/user/settings/account', cookies=cookies, allow_redirects=False, verify=False)
