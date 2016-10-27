@@ -52,7 +52,7 @@ class SMBbrute(smbModule):
                     self.connectTest(config, userID, password, server_name)
                     time.sleep(config["timeout"])
         elif config["UserFile"]:
-            lines = [line.rstrip('\n') for line in open(self.config["UserFile"])]
+            lines = [line.rstrip('\n') for line in open(config["UserFile"])]
             for line in lines:
                 config["USERNAME"] = line.strip('\n')
                 userID = config["USERNAME"]
