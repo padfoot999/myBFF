@@ -67,6 +67,7 @@ Point the framework at a file containing usernames, a host, and give it a passwo
 - Okta (Enumerate Applications and check if 2FA is setup for account)
 - Jenkins (Will be adding "Something Cool" soon)
 - SMB (Check if user is an administrator) (must use --domain with this module. for host, use smb://)
+- FTP (List root dir contents)
 
 New modules will be added.
 
