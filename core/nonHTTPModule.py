@@ -1,7 +1,7 @@
 
 
 
-class smbModule(object):
+class nonHTTPModule(object):
     def __init__(self, config, display, lock):
         self.fingerprint = ""
         self.name = ""
