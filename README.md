@@ -49,7 +49,7 @@
               -mdoooo+-`
                ..`
 --- A Brute Force Framework by Kirk Hayes (l0gan)
---- myBFF v1.5
+--- myBFF v1.5.1
 ```
 myBFF is a web application brute force framework (currently)
 
@@ -66,6 +66,7 @@ Point the framework at a file containing usernames, a host, and give it a passwo
 - CiscoVPN (Enumerate User accounts (May not work on all configurations))
 - Okta (Enumerate Applications and check if 2FA is setup for account)
 - Jenkins (Will be adding "Something Cool" soon)
+- SMB (Check if user is an administrator) (must use --domain with this module. for host, use smb://)
 
 New modules will be added.
 
@@ -76,7 +77,7 @@ myBFF requires lxml. Install using 'sudo apt-get install python-lxml'
 https://github.com/MooseDojo/myBFF/wiki/Use
 ```
 python myBFF.py --host https://example.com -U userfile.txt -p password123
---host - Host including protocol. Protocols currently support http and https only.
+--host - Host including protocol. Protocols currently support http, https, and smb only.
 -u <username> - test single username
 -U <usernameFile> - username file
 -p <password> - password

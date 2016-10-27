@@ -1,8 +1,5 @@
 #! /usr/bin/python
-<<<<<<< HEAD
 # Created by Kirk Hayes (l0gan)
-=======
->>>>>>> 2804a1852bd854b3e5246216f95bbc35881ea828
 # Part of myBFF, SMB guessing
 import smb
 from smb.base import SharedDevice
@@ -17,7 +14,6 @@ class SMBbrute(smbModule):
         self.fingerprint="smb"
         self.response=""
 
-class SMB():
     def somethingCool(self, config, userID, password, server_name, conn, connection):
             try:
                 shareList = conn.listPath('C$', '//')
@@ -26,6 +22,7 @@ class SMB():
                 print "[-]        User is not an Administrator"
 
     def connectTest(self, config, userID, password, server_name):
+        #print userID + " " + password + " " + server_name + " " + config["domain"]
         conn = SMBConnection(userID, password, 'pycon', server_name, use_ntlm_v2=True, domain=config["domain"], sign_options=SMBConnection.SIGN_WHEN_SUPPORTED, is_direct_tcp=True)
         connection = conn.connect(server_name, 445)
         if connection:
@@ -61,15 +58,6 @@ class SMB():
                 userID = config["USERNAME"]
                 password = config["PASSWORD"]
                 self.connectTest(config, userID, password, server_name)
-    def payload(self, config):
-        server_name = str(config["HOST"]).strip('smb://')
-        if config["UserFile"]:
-            lines = [line.rstrip('\n') for line in open(config["UserFile"])]
-            for line in lines:
-                    config["USERNAME"] = line.strip('\n')
-                    userID = config["USERNAME"]
-                    password = config["PASSWORD"]
-                    self.connectTest(config, userID, password, server_name)
         else:
             userID = config["USERNAME"]
             password = config["PASSWORD"]

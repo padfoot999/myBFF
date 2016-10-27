@@ -392,6 +392,7 @@ class Framework():
               -mdoooo+-`
                .. """
         print " ---a Brute Force Framework by l0gan (@kirkphayes)"
+        print " myBFF v1.5.1"
     def run(self, argv):
         self.parseParameters(argv)
         if self.config["output"]:
