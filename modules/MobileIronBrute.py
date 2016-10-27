@@ -14,6 +14,7 @@ class MobileIronBrute(webModule):
         super(MobileIronBrute, self).__init__(config, display, lock)
         self.fingerprint="MobileIron"
         self.response="Success"
+        self.protocol="web"
     def somethingCool(self, config):
         print("[-] Not yet implemented...")
     def connectTest(self, config, payload, proxy, submitLoc, submitType):

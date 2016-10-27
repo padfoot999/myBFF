@@ -18,6 +18,7 @@ class Office365Brute(webModule):
         super(Office365Brute, self).__init__(config, display, lock)
         self.fingerprint="[o, O]utlook"
         self.response="Success"
+        self.protocol="web"
     term = ['credential', 'account', 'password', 'login', 'confidential']
     def somethingCool(self, term, data, config):
         # Parse the result xml

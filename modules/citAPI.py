@@ -12,6 +12,7 @@ class citAPI(webModule):
         super(citAPI, self).__init__(config, display, lock)
         self.fingerprint="citAPI"
         self.response="Success"
+        self.protocol="web"
     def somethingCool(self, config, payload):
         print("Doing something cool...eventually...")
     def connectTest(self, config, payload):

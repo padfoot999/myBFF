@@ -8,6 +8,7 @@ class webModule(object):
         self.description = ""
         self.type = ""
         self.response = ""
+        self.protocol = ""
 
     def getFingerprint(self):
         return self.fingerprint
@@ -26,3 +27,6 @@ class webModule(object):
 
     def doSomethingCool(self):
         return
+
+    def getProtocol(self):
+        return self.protocol

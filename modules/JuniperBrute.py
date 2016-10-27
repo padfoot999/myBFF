@@ -14,6 +14,7 @@ class JuniperBrute(webModule):
         super(JuniperBrute, self).__init__(config, display, lock)
         self.fingerprint="dana-na"
         self.response="Success"
+        self.protocol="web"
     ignore = ['tz_offset','btnSubmit']
     URLS = []
     nomfaurls = []

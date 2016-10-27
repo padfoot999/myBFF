@@ -16,6 +16,7 @@ class SiteScopeBrute(webModule):
         super(SiteScopeBrute, self).__init__(config, display, lock)
         self.fingerprint="SiteScope"
         self.response="Success"
+        self.protocol="web"
     def somethingCool(self, config):
         host = config["HOST"].split(":")[1]
         host = host.split("/")[2]

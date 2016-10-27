@@ -27,8 +27,8 @@ class Framework():
         self.modulelock = RLock()
         self.coolness = {}
     def runner(self):
-        modules_dict, finger_dict = self.loadModules()
-        self.connectTest(modules_dict, finger_dict)
+        modules_dict, finger_dict, protocol_dict = self.loadModules()
+        self.connectTest(modules_dict, finger_dict, protocol_dict)
 
     def search(self, values, searchFor):
         for k in values:
@@ -37,34 +37,34 @@ class Framework():
                     return v
                     return None
 
-    def connectTest(self, modules_dict, finger_dict):
-        if 'smb' in self.config["HOST"]:
-            if not self.config["domain"]:
-                print("[-]  ERROR: You must supply a domain/workgroup with --domain")
-            else:
-                print("[+] Running SMB module...")
-                server_name = str(self.config["HOST"]).strip('smb://')
-                mod_type = 'SMB'
+    def connectTest(self, modules_dict, finger_dict, protocol_dict):
+        for k in protocol_dict:
+            search = re.search(str(k), self.config["HOST"])
+            if search:
+                print "[+] Running " + self.search(protocol_dict, str(k)) + " module..."
+                server_name = str(self.config["HOST"]).strip(str(k) + '://')
+                mod_type = str(self.config["HOST"])[0:3].upper()
                 self.nonHTTPpayloadBldr(self.config, server_name, mod_type)
+                sys.exit()
         else:
-            with session() as c:
-                proxy = self.proxySelect()
-                requests.packages.urllib3.disable_warnings()
-                if self.config["vhost"]:
-                    initialConnect = c.get(self.config["HOST"] + "/" + self.config["vhost"], verify=False, proxies=proxy)
-                else:
-                    initialConnect = c.get(self.config["HOST"], verify=False, allow_redirects=True, proxies=proxy)
-                for k in finger_dict:
-                    search = re.search(str(k), initialConnect.text)
-                    if search:
-                        print "[+] Running " + self.search(finger_dict, str(k)) + " module..."
-                        USERNAMEFLD, PASSWORDFLD, submitLoc, submitType = self.scraper()
-                        if self.config["test"] == True:
-                            mod_run = "testmod"
-                        else:
-                            mod_run = self.search(finger_dict, str(k))
-                        mod_import = "modules." + mod_run
-                        self.payloadBldr(self.config, USERNAMEFLD, PASSWORDFLD, mod_run, mod_import, submitLoc, submitType)
+                with session() as c:
+                    proxy = self.proxySelect()
+                    requests.packages.urllib3.disable_warnings()
+                    if self.config["vhost"]:
+                        initialConnect = c.get(self.config["HOST"] + "/" + self.config["vhost"], verify=False, proxies=proxy)
+                    else:
+                        initialConnect = c.get(self.config["HOST"], verify=False, allow_redirects=True, proxies=proxy)
+                    for k in finger_dict:
+                        search = re.search(str(k), initialConnect.text)
+                        if search:
+                            print "[+] Running " + self.search(finger_dict, str(k)) + " module..."
+                            USERNAMEFLD, PASSWORDFLD, submitLoc, submitType = self.scraper()
+                            if self.config["test"] == True:
+                                mod_run = "testmod"
+                            else:
+                                mod_run = self.search(finger_dict, str(k))
+                            mod_import = "modules." + mod_run
+                            self.payloadBldr(self.config, USERNAMEFLD, PASSWORDFLD, mod_run, mod_import, submitLoc, submitType)
 
 
     def loadFingerprint(self, type, dirpath, filename):
@@ -89,6 +89,29 @@ class Framework():
             print e
             return None
         return finger_dict
+
+    def loadProtocol(self, type, dirpath, filename):
+        protocol_dict = {}
+        mod_name = filename.split('.')[0]
+        mod_dispname = '/'.join(re.split('/modules/' + type, dirpath)[-1].split('/') + [mod_name])
+        mod_loadname = mod_dispname.replace('/', '_')
+        mod_loadpath = os.path.join(dirpath, filename)
+        mod_file = open(mod_loadpath)
+        try:
+            # import the module into memory
+            imp.load_source(mod_loadname, mod_loadpath, mod_file)
+            # find the module and make an instace of it
+            _module = __import__(mod_loadname)
+            _class = getattr(_module, mod_name)
+            _instance = _class(self.config, self.display, self.modulelock)
+            protocol_dict = {'protocol': _instance.getProtocol(), mod_name: 'name'}
+
+
+        except Exception as e:
+            # notify the user of errors
+            print e
+            return None
+        return protocol_dict
 
     def loadModule(self, type, dirpath, filename):
         module_dict = {}
@@ -121,6 +144,7 @@ class Framework():
     def loadModules(self):
         module_dict = {}
         finger_dict = {}
+        protocol_dict = {}
         path = os.path.join(sys.path[0], 'modules/')
         for dirpath, dirnames, filenames in os.walk(path):
             # remove hidden files and directories
@@ -132,11 +156,13 @@ class Framework():
                     if module is not None:
                         module_dict[module['name'].rstrip(" ")] = module
                     fingerprint = self.loadFingerprint("modules", dirpath, filename)
-                    #print fingerprint
                     if module is not None:
                         finger_dict[fingerprint['fingerprint'].rstrip(" ")] = fingerprint
+                    protocol = self.loadProtocol("modules", dirpath, filename)
+                    if module is not None:
+                        protocol_dict[protocol['protocol'].rstrip(" ")] = protocol
 
-        return module_dict, finger_dict
+        return module_dict, finger_dict, protocol_dict
 
     def payloadBldr(self, config, USERNAMEFLD, PASSWORDFLD, mod_run, mod_import, submitLoc, submitType):
         if self.config["PASS_FILE"]:
