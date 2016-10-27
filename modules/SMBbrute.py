@@ -7,7 +7,6 @@
 import smb
 from smb.base import SharedDevice
 from smb.SMBConnection import SMBConnection
-<<<<<<< HEAD
 from core.smbModule import smbModule
 import time
 
@@ -17,10 +16,8 @@ class SMBbrute(smbModule):
         super(SMBbrute, self).__init__(config, display, lock)
         self.fingerprint="smb"
         self.response=""
-=======
 
 class SMB():
->>>>>>> 2804a1852bd854b3e5246216f95bbc35881ea828
     def somethingCool(self, config, userID, password, server_name, conn, connection):
             try:
                 shareList = conn.listPath('C$', '//')
@@ -28,11 +25,6 @@ class SMB():
             except:
                 print "[-]        User is not an Administrator"
 
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 2804a1852bd854b3e5246216f95bbc35881ea828
     def connectTest(self, config, userID, password, server_name):
         conn = SMBConnection(userID, password, 'pycon', server_name, use_ntlm_v2=True, domain=config["domain"], sign_options=SMBConnection.SIGN_WHEN_SUPPORTED, is_direct_tcp=True)
         connection = conn.connect(server_name, 445)
@@ -41,7 +33,6 @@ class SMB():
             self.somethingCool(config, userID, password, server_name, conn, connection)
         else:
             print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])
-<<<<<<< HEAD
 
     def payload(self, config):
         server_name = str(config["HOST"]).strip('smb://')
@@ -70,7 +61,6 @@ class SMB():
                 userID = config["USERNAME"]
                 password = config["PASSWORD"]
                 self.connectTest(config, userID, password, server_name)
-=======
     def payload(self, config):
         server_name = str(config["HOST"]).strip('smb://')
         if config["UserFile"]:
@@ -80,7 +70,6 @@ class SMB():
                     userID = config["USERNAME"]
                     password = config["PASSWORD"]
                     self.connectTest(config, userID, password, server_name)
->>>>>>> 2804a1852bd854b3e5246216f95bbc35881ea828
         else:
             userID = config["USERNAME"]
             password = config["PASSWORD"]
