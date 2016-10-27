@@ -17,6 +17,7 @@ from lxml import html
 import random
 import time
 from collections import OrderedDict
+from modules.SMBbrute import SMBbrute
 
 
 class Framework():
@@ -38,6 +39,14 @@ class Framework():
                     return None
 
     def connectTest(self, modules_dict, finger_dict):
+        if 'smb' in self.config["HOST"]:
+            if not self.config["domain"]:
+                print("[-]  ERROR: You must supply a domain/workgroup with --domain")
+            else:
+                print("[+] Running SMB module...")
+                smb = SMBbrute(self.config, self.display, self.modulelock)
+                smb.payload(self.config)
+        else:
             with session() as c:
                 proxy = self.proxySelect()
                 requests.packages.urllib3.disable_warnings()
